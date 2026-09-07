@@ -1,4 +1,4 @@
-# OSim — Interactive Operating System Resource Management Simulator
+# OSim - Interactive Operating System Resource Management Simulator
 
 ## Project Overview
 
