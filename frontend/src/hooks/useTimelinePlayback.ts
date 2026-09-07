@@ -31,6 +31,18 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
   const [speed, setSpeed] = useState<number>(1);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tick = params.get('tick');
+      if (tick !== null) {
+        const parsed = parseInt(tick, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+          setCurrentTick(parsed);
+          setIsPlaying(false);
+          return;
+        }
+      }
+    }
     setCurrentTick(0);
     setIsPlaying(false);
   }, [simulationResult]);
