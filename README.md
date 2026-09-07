@@ -10,7 +10,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 
 ## Current Implementation Status
 
-### ✅ Phase 1 — Core Engine + CPU Scheduling
+### ✅ Phase 1 - Core Engine + CPU Scheduling
 - **Discrete-Time Simulation Engine**: Deterministic tick-by-tick simulation cycle with strict temporal ordering.
 - **Immutable SystemState Snapshots**: Every discrete tick produces an immutable state snapshot capturing CPU state, ready queue order, and process progress.
 - **Standardized SimulationEvent Model**: Structured event stream capturing `PROCESS_ARRIVED`, `PROCESS_SCHEDULED`, `PROCESS_PREEMPTED`, `PROCESS_COMPLETED`, `CPU_IDLE`, and `CONTEXT_SWITCH`.
