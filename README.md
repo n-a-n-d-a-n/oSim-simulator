@@ -1,4 +1,4 @@
-# OSim — Interactive Operating System Resource Management Simulator
+# OSim - Interactive Operating System Resource Management Simulator
 
 ## Project Overview
 
@@ -10,7 +10,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 
 ## Current Implementation Status
 
-### ✅ Phase 1 — Core Engine + CPU Scheduling
+### ✅ Phase 1 - Core Engine + CPU Scheduling
 - **Discrete-Time Simulation Engine**: Deterministic tick-by-tick simulation cycle with strict temporal ordering.
 - **Immutable SystemState Snapshots**: Every discrete tick produces an immutable state snapshot capturing CPU state, ready queue order, and process progress.
 - **Standardized SimulationEvent Model**: Structured event stream capturing `PROCESS_ARRIVED`, `PROCESS_SCHEDULED`, `PROCESS_PREEMPTED`, `PROCESS_COMPLETED`, `CPU_IDLE`, and `CONTEXT_SWITCH`.
@@ -25,7 +25,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 - **Context-Switch Modeling**: Configurable context-switch overhead ticks inserted between process switches.
 - **Automated Tests**: 31 comprehensive unit and integration tests passing against canonical benchmarks.
 
-### ✅ Phase 2 — CPU Scheduling API + Frontend
+### ✅ Phase 2 - CPU Scheduling API + Frontend
 - **FastAPI REST API**: High-performance RESTful service exposing CPU simulation execution and benchmark workloads.
 - **React + TypeScript Interface**: Modern, responsive dashboard engineered with Vite and TypeScript.
 - **CPU Scheduling Controls**: Intuitive UI for selecting algorithms, adjusting quantum, toggling preemption, and configuring context-switch overhead.
@@ -39,7 +39,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 - **Event Log**: Chronological, searchable audit trail of every simulation event with tick timestamps.
 - **Timeline Playback**: Interactive media controller featuring **Play**, **Pause**, **Step Forward**, **Step Back**, **Reset**, timeline slider scrubber, and variable playback speeds (0.5x, 1x, 2x, 4x).
 
-### ✅ Phase 3 — Contiguous Memory Allocation
+### ✅ Phase 3 - Contiguous Memory Allocation
 - **Pure-Python Memory Engine**: Completely decoupled discrete-time memory simulation subsystem with invariant preservation.
 - **Address-Accurate Contiguous Memory Model**: Single continuous address space `[0, memory_size)` using half-open intervals `[start_address, end_address)`.
 - **Memory Allocation Algorithms**:
@@ -65,10 +65,10 @@ The simulator allows students, educators, and systems engineers to inspect step-
 
 ## Planned Phases
 
-- ⬜ **Phase 4 — Virtual Memory + Page Replacement** (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
-- ⬜ **Phase 5 — Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
-- ⬜ **Phase 6 — Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
-- ⬜ **Phase 7 — Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
+- ⬜ **Phase 4 - Virtual Memory + Page Replacement** (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
+- ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
+- ⬜ **Phase 6 - Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
+- ⬜ **Phase 7 - Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
 
 ---
 
