@@ -25,7 +25,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 - **Context-Switch Modeling**: Configurable context-switch overhead ticks inserted between process switches.
 - **Automated Tests**: 31 comprehensive unit and integration tests passing against canonical benchmarks.
 
-### ✅ Phase 2 — CPU Scheduling API + Frontend
+### ✅ Phase 2 - CPU Scheduling API + Frontend
 - **FastAPI REST API**: High-performance RESTful service exposing CPU simulation execution and benchmark workloads.
 - **React + TypeScript Interface**: Modern, responsive dashboard engineered with Vite and TypeScript.
 - **CPU Scheduling Controls**: Intuitive UI for selecting algorithms, adjusting quantum, toggling preemption, and configuring context-switch overhead.
