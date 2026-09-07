@@ -29,8 +29,8 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'cpu' | 'memory'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('tab') === 'memory') return 'memory';
-      if (window.location.hash === '#memory') return 'memory';
+      if (params.get('tab') === 'memory' || params.has('memory_tick')) return 'memory';
+      if (window.location.hash.includes('memory')) return 'memory';
     }
     return 'cpu';
   });

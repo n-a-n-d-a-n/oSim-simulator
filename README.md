@@ -2,11 +2,34 @@
 
 ## Project Overview
 
-**OSim** is an educational, web-based operating-system simulator designed to visualize core OS resource-management concepts interactively. Through real-time Gantt charts, proportional address-accurate memory maps, process state tracking, and deterministic timeline playback, OSim bridges the gap between theoretical operating system principles and practical runtime behavior.
+**OSim** is an educational, web-based operating-system simulator designed to
+visualize core OS resource-management concepts interactively. Styled as a "retro
+systems console" — oscilloscope-style execution traces, terminal event logs, and
+punch-card process strips — it bridges the gap between theoretical operating system
+principles and practical runtime behavior through real-time Gantt charts,
+proportional address-accurate memory maps, process state tracking, and deterministic
+timeline playback.
 
-The simulator allows students, educators, and systems engineers to inspect step-by-step CPU scheduling and contiguous memory allocation, simulate context switches, examine ready queues and free holes, and analyze performance metrics under textbook workloads and custom edge cases.
+The simulator allows students, educators, and systems engineers to inspect
+step-by-step CPU scheduling and contiguous memory allocation, simulate context
+switches, examine ready queues and free holes, and analyze performance metrics
+under textbook workloads and custom edge cases.
+
+## UI Preview
+
+| CPU Scheduling — Oscilloscope View | Memory Allocation — Address Map |
+|---|---|
+| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) |
+
+The interface renders simulation state as a live instrument panel: a stepped
+oscilloscope trace for CPU execution, `[BRACKETED]` terminal-style state tags for
+process transitions, a scrolling TTY event stream, and punch-card style process
+input strips — all built on a strict six-color token system (phosphor green,
+amber, rust, warning orange, punch-hole crimson, muted gray) against a near-black
+instrument chassis.
 
 ---
+
 
 ## Current Implementation Status
 
