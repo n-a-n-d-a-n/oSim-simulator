@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-**OSim** is an educational, web-based operating-system simulator designed to visualize core OS resource-management concepts interactively. Through real-time Gantt charts, process state tracking, and playback controls, OSim bridges the gap between theoretical operating system principles and practical runtime behavior.
+**OSim** is an educational, web-based operating-system simulator designed to visualize core OS resource-management concepts interactively. Through real-time Gantt charts, proportional address-accurate memory maps, process state tracking, and deterministic timeline playback, OSim bridges the gap between theoretical operating system principles and practical runtime behavior.
 
-The simulator allows students, educators, and systems engineers to inspect step-by-step CPU scheduling, simulate context switches, examine ready queues, and analyze performance metrics under textbook workloads and custom edge cases.
+The simulator allows students, educators, and systems engineers to inspect step-by-step CPU scheduling and contiguous memory allocation, simulate context switches, examine ready queues and free holes, and analyze performance metrics under textbook workloads and custom edge cases.
 
 ---
 
@@ -39,11 +39,32 @@ The simulator allows students, educators, and systems engineers to inspect step-
 - **Event Log**: Chronological, searchable audit trail of every simulation event with tick timestamps.
 - **Timeline Playback**: Interactive media controller featuring **Play**, **Pause**, **Step Forward**, **Step Back**, **Reset**, timeline slider scrubber, and variable playback speeds (0.5x, 1x, 2x, 4x).
 
+### ✅ Phase 3 - Contiguous Memory Allocation
+- **Pure-Python Memory Engine**: Completely decoupled discrete-time memory simulation subsystem with invariant preservation.
+- **Address-Accurate Contiguous Memory Model**: Single continuous address space `[0, memory_size)` using half-open intervals `[start_address, end_address)`.
+- **Memory Allocation Algorithms**:
+  - **First Fit**: Scans memory from address 0, selecting the first free block large enough to satisfy the request.
+  - **Best Fit**: Scans all free blocks, selecting the smallest block that is large enough (tie-breaking deterministically by lowest start address).
+  - **Worst Fit**: Scans all free blocks, selecting the largest available block (tie-breaking deterministically by lowest start address).
+  - **Next Fit**: Scans from an integer memory address cursor forward with wrap-around back to address 0, advancing cursor to the end of the allocated partition and preserving cursor position across deallocations.
+- **Dynamic Block Splitting & Canonical Coalescing**: Allocations partition free blocks cleanly into allocated and remainder blocks; deallocations trigger immediate bidirectional coalescing of adjacent free blocks.
+- **Deterministic Same-Tick Ordering**: Deallocations are processed before allocations at any tick, enabling immediate reuse of freed memory within the same tick.
+- **External Fragmentation Modeling**: Explicit calculation of `total_free_memory - largest_free_block`, accompanied by educational failure diagnostics explaining why contiguous allocation failed despite sufficient total free space.
+- **FastAPI Endpoints**:
+  - `POST /api/v1/memory/simulate`: Simulates memory operations and returns tick-by-tick snapshots, events, and metrics.
+  - `GET /api/v1/memory/workloads`: Catalog of educational workloads (Presets A through G).
+  - `GET /api/v1/memory/workloads/{preset_id}`: Single preset retrieval.
+- **Interactive Visualization**:
+  - Proportional, address-accurate memory map bar with hover tooltips and Next Fit cursor indicator.
+  - Real-time KPI cards: Total, Used, Free, Largest Free Block, External Fragmentation, and Allocation Success/Failure.
+  - Educational allocation feedback cards.
+  - Reversible timeline playback (Play / Pause / Step Forward / Step Back / Reset / Speed / Scrubber).
+  - Chronological memory event stream with type filters.
+
 ---
 
 ## Planned Phases
 
-- ⬜ **Phase 3 - Contiguous Memory Allocation** (Fixed & variable partitioning, First-Fit, Best-Fit, Worst-Fit, external fragmentation & compaction)
 - ⬜ **Phase 4 - Virtual Memory + Page Replacement** (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
 - ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
 - ⬜ **Phase 6 - Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
@@ -70,7 +91,7 @@ OSim follows a strict three-tier layered architecture enforcing clean separation
                             ▼
 ┌─────────────────────────────────────────────────────────┐
 │               Pure Python Simulation Engine             │
-│    (Discrete Engine, Core Schedulers, Event Models)     │
+│    (Discrete Engine, Core Schedulers, Memory Subsystem) │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -78,8 +99,9 @@ OSim follows a strict three-tier layered architecture enforcing clean separation
 
 ---
 
-## Current Algorithms
+## Implemented Algorithms
 
+### CPU Scheduling
 | Algorithm | Type | Preemptive | Key Parameters |
 | :--- | :--- | :--- | :--- |
 | **FCFS** (First-Come, First-Served) | Non-Preemptive | No | Arrival Time, Burst Time |
@@ -87,6 +109,14 @@ OSim follows a strict three-tier layered architecture enforcing clean separation
 | **SRTF** (Shortest Remaining Time First) | Preemptive | Yes | Remaining Burst Time |
 | **Round Robin** | Preemptive | Yes | Time Quantum ($q$) |
 | **Priority Scheduling** | Preemptive / Non-Preemptive | Configurable | Priority Level, Polarity |
+
+### Contiguous Memory Allocation
+| Strategy | Search Starting Point | Block Selection Criteria | Tie-Breaking Rule |
+| :--- | :--- | :--- | :--- |
+| **First Fit** | Address 0 | First block where $\text{size} \ge \text{requested}$ | Lowest address (scan order) |
+| **Best Fit** | Address 0 (exhaustive) | Smallest block where $\text{size} \ge \text{requested}$ | Lowest start address |
+| **Worst Fit** | Address 0 (exhaustive) | Largest block where $\text{size} \ge \text{requested}$ | Lowest start address |
+| **Next Fit** | Current Address Cursor | First block from cursor with wrap-around | Scan order from cursor |
 
 ---
 
@@ -118,10 +148,10 @@ cd frontend
 npm install
 npm run dev
 ```
-Open your browser at the displayed local URL (typically `http://localhost:5173`).
+Open your browser at the displayed local URL (typically `http://localhost:5173`). Switch seamlessly between CPU Scheduling and Contiguous Memory Allocation using the top navigation tab bar.
 
 ### 4. Run Automated Tests
-Execute the full test suite from the repository root:
+Execute the full test suite (78 tests) from the repository root:
 ```bash
 pytest
 ```

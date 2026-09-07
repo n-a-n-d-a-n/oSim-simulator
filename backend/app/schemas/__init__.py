@@ -14,6 +14,19 @@ from backend.app.schemas.cpu import (
     SystemStateResponse,
     PresetItemResponse,
 )
+from backend.app.schemas.memory import (
+    MemoryAlgorithmType,
+    MemoryOperationType,
+    MemoryOperationInput,
+    MemoryBlockResponse,
+    MemoryMetricsResponse,
+    OperationResultResponse,
+    MemoryStateResponse,
+    MemoryEventResponse,
+    MemorySimulateRequest,
+    MemorySimulateResponse,
+    MemoryPresetItemResponse,
+)
 
 __all__ = [
     "AlgorithmType",
@@ -28,4 +41,15 @@ __all__ = [
     "CPUStateResponse",
     "SystemStateResponse",
     "PresetItemResponse",
+    "MemoryAlgorithmType",
+    "MemoryOperationType",
+    "MemoryOperationInput",
+    "MemoryBlockResponse",
+    "MemoryMetricsResponse",
+    "OperationResultResponse",
+    "MemoryStateResponse",
+    "MemoryEventResponse",
+    "MemorySimulateRequest",
+    "MemorySimulateResponse",
+    "MemoryPresetItemResponse",
 ]

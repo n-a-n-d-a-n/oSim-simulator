@@ -1,12 +1,17 @@
 /**
- * Hook to manage local timeline playback of a pre-computed simulation result.
- * Strictly replay-only: does not run any scheduling or metrics calculations in JavaScript.
+ * Playback hook for memory simulation results.
+ * Strictly replay-only: reads immutable snapshots from backend response.
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { CPUSimulateResponse, SystemState, SimulationEvent, GanttSegment } from '../types/cpu';
+import type {
+  MemorySimulateResponse,
+  MemoryStateSnapshot,
+  MemoryEvent,
+  OperationResultSnapshot,
+} from '../types/memory';
 
-export interface TimelinePlaybackController {
+export interface MemoryPlaybackController {
   currentTick: number;
   maxTicks: number;
   isPlaying: boolean;
@@ -19,13 +24,15 @@ export interface TimelinePlaybackController {
   reset: () => void;
   setTick: (tick: number) => void;
   setSpeed: (speed: number) => void;
-  currentState: SystemState | null;
-  currentGanttSegment: GanttSegment | null;
-  eventsAtCurrentTick: SimulationEvent[];
-  recentEvents: SimulationEvent[];
+  currentState: MemoryStateSnapshot | null;
+  eventsAtCurrentTick: MemoryEvent[];
+  recentEvents: MemoryEvent[];
+  currentOperationResult: OperationResultSnapshot | null;
 }
 
-export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null): TimelinePlaybackController {
+export function useMemoryTimelinePlayback(
+  simulationResult: MemorySimulateResponse | null
+): MemoryPlaybackController {
   const [currentTick, setCurrentTick] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<number>(1);
@@ -37,7 +44,7 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
 
   const maxTicks = useMemo(() => {
     if (!simulationResult || simulationResult.timeline.length === 0) return 0;
-    return simulationResult.timeline[simulationResult.timeline.length - 1].clock;
+    return simulationResult.timeline[simulationResult.timeline.length - 1].tick;
   }, [simulationResult]);
 
   useEffect(() => {
@@ -48,7 +55,7 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
       return;
     }
 
-    const intervalMs = Math.max(80, Math.floor(700 / speed));
+    const intervalMs = Math.max(100, Math.floor(800 / speed));
     const timer = setInterval(() => {
       setCurrentTick((prev) => {
         if (prev >= maxTicks) {
@@ -96,27 +103,25 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
     setCurrentTick(0);
   }, []);
 
-  const setTick = useCallback((tick: number) => {
-    setIsPlaying(false);
-    const bounded = Math.max(0, Math.min(tick, maxTicks));
-    setCurrentTick(bounded);
-  }, [maxTicks]);
+  const setTick = useCallback(
+    (tick: number) => {
+      setIsPlaying(false);
+      const bounded = Math.max(0, Math.min(tick, maxTicks));
+      setCurrentTick(bounded);
+    },
+    [maxTicks]
+  );
 
   const currentState = useMemo(() => {
     if (!simulationResult || simulationResult.timeline.length === 0) return null;
-    if (currentTick < simulationResult.timeline.length) {
-      return simulationResult.timeline[currentTick];
+    const found = simulationResult.timeline.find((s) => s.tick === currentTick);
+    if (found) return found;
+    // Fallback to nearest previous state
+    for (let t = currentTick; t >= 0; t--) {
+      const prev = simulationResult.timeline.find((s) => s.tick === t);
+      if (prev) return prev;
     }
-    return simulationResult.timeline[simulationResult.timeline.length - 1];
-  }, [simulationResult, currentTick]);
-
-  const currentGanttSegment = useMemo(() => {
-    if (!simulationResult) return null;
-    return (
-      simulationResult.gantt_segments.find(
-        (seg) => currentTick >= seg.start_time && currentTick < seg.end_time
-      ) || null
-    );
+    return simulationResult.timeline[0];
   }, [simulationResult, currentTick]);
 
   const eventsAtCurrentTick = useMemo(() => {
@@ -128,6 +133,11 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
     if (!simulationResult) return [];
     return simulationResult.events.filter((e) => e.tick <= currentTick);
   }, [simulationResult, currentTick]);
+
+  const currentOperationResult = useMemo(() => {
+    if (!currentState) return null;
+    return currentState.last_operation_result || null;
+  }, [currentState]);
 
   return {
     currentTick,
@@ -143,8 +153,8 @@ export function useTimelinePlayback(simulationResult: CPUSimulateResponse | null
     setTick,
     setSpeed,
     currentState,
-    currentGanttSegment,
     eventsAtCurrentTick,
     recentEvents,
+    currentOperationResult,
   };
 }
