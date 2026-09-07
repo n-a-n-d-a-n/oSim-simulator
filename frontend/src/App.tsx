@@ -22,11 +22,18 @@ import { TimelineControls } from './components/cpu/TimelineControls';
 
 import { MemoryDashboard } from './components/memory/MemoryDashboard';
 
-import { Cpu, HardDrive, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation Module Tab
-  const [activeTab, setActiveTab] = useState<'cpu' | 'memory'>('cpu');
+  const [activeTab, setActiveTab] = useState<'cpu' | 'memory'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'memory') return 'memory';
+      if (window.location.hash === '#memory') return 'memory';
+    }
+    return 'cpu';
+  });
 
   // CPU Simulator configuration state
   const [algorithm, setAlgorithm] = useState<AlgorithmType>('SRTF');
@@ -90,73 +97,72 @@ export const App: React.FC = () => {
       : null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30">
-      <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
-        {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#E8F5E9] flex flex-col font-mono selection:bg-[#39FF6A]/20 selection:text-[#39FF6A]">
+      <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4 flex-1">
+        {/* Console Header */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2A26] pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 shadow-lg shadow-cyan-500/10">
-              <Cpu className="w-6 h-6" />
+            <div className="w-8 h-8 bg-[#12130F] border border-[#39FF6A] rounded-[2px] flex items-center justify-center text-[#39FF6A]">
+              <span className="font-bold text-sm">Ω</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-slate-100">
-                  OSim Simulator
+                <h1 className="text-base sm:text-lg font-bold tracking-wider text-[#E8F5E9] uppercase">
+                  OSIM // SYSTEMS CONSOLE
                 </h1>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                  Phase 1 · 2 · 3
+                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#12130F] border border-[#2A2A26] text-[#DCDCAA]">
+                  REV 3.1
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Interactive Operating System Resource Management Simulator &bull; Pure Deterministic Engine
+              <p className="text-[11px] text-[#888888]">
+                DETERMINISTIC CPU SCHEDULING &bull; REAL-TIME OSCILLOSCOPE LOG
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-slate-300">FastAPI REST Ready</span>
+          <div className="flex items-center gap-3 text-xs text-[#888888]">
+            <div className="flex items-center gap-1.5 bg-[#12130F] border border-[#2A2A26] px-2 py-1 rounded-[2px]">
+              <span className="w-2 h-2 rounded-full bg-[#39FF6A] animate-pulse" />
+              <span className="text-[#39FF6A] font-bold">CORE ONLINE</span>
+            </div>
           </div>
         </header>
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-xl w-fit shadow-md">
+        {/* Instrument Switch Tabs */}
+        <div className="flex items-center gap-2 p-1 bg-[#12130F] border border-[#2A2A26] rounded-[2px] w-fit">
           <button
             onClick={() => setActiveTab('cpu')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-colors cursor-pointer ${
               activeTab === 'cpu'
-                ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-[#0A0A0A] text-[#39FF6A] border border-[#39FF6A]'
+                : 'text-[#888888] hover:text-[#E8F5E9] border border-transparent'
             }`}
           >
-            <Cpu className="w-4 h-4" />
-            <span>CPU Scheduling (Phase 1 & 2)</span>
+            <span>[•]</span>
+            <span>CPU SCHEDULING (PHASE 1 &amp; 2)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('memory')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-colors cursor-pointer ${
               activeTab === 'memory'
-                ? 'bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-md shadow-violet-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-[#0A0A0A] text-[#DCDCAA] border border-[#DCDCAA]'
+                : 'text-[#888888] hover:text-[#E8F5E9] border border-transparent'
             }`}
           >
-            <HardDrive className="w-4 h-4" />
-            <span>Contiguous Memory Allocation (Phase 3)</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-400/20 text-violet-300 font-mono border border-violet-400/30">
-              NEW
-            </span>
+            <span>[ ]</span>
+            <span>CONTIGUOUS MEMORY ALLOCATION (PHASE 3)</span>
           </button>
         </div>
 
         {/* ACTIVE TAB: CPU SIMULATOR */}
         {activeTab === 'cpu' && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Error Alert */}
             {errorMessage && (
-              <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 flex items-center gap-3 text-rose-300 text-sm">
-                <AlertCircle className="w-5 h-5 shrink-0" />
+              <div className="bg-[#B8433A]/10 border border-[#B8433A] rounded-[2px] p-3 flex items-center gap-3 text-[#E8F5E9] text-xs">
+                <AlertCircle className="w-4 h-4 text-[#B8433A] shrink-0" />
                 <div>
-                  <span className="font-semibold">Error: </span>
+                  <span className="font-bold text-[#B8433A]">SYSTEM ERROR: </span>
                   {errorMessage}
                 </div>
               </div>
@@ -263,11 +269,12 @@ export const App: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-4 text-center text-xs text-slate-500 font-mono">
-        OSim &bull; Educational Operating System Resource Simulator &bull; Phase 1 (CPU Engine) + Phase 2 (CPU Frontend) + Phase 3 (Contiguous Memory)
+      <footer className="border-t border-[#2A2A26] bg-[#0A0A0A] py-3 text-center text-xs text-[#888888] font-mono">
+        OSIM // EDUCATIONAL OPERATING SYSTEM RESOURCE SIMULATOR &bull; RETRO SYSTEMS CONSOLE REV 3.1
       </footer>
     </div>
   );
 };
 
 export default App;
+

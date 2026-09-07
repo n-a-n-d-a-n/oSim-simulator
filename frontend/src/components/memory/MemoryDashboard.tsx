@@ -70,19 +70,21 @@ export const MemoryDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 font-mono">
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-3 text-rose-300 text-sm">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
-          <div className="flex-1">
-            <strong>Simulation Request Error:</strong> {errorMessage}
+        <div className="p-3 bg-[#B8433A]/10 border border-[#B8433A] rounded-[2px] flex items-center justify-between gap-3 text-[#E8F5E9] text-xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#B8433A]" />
+            <div>
+              <strong className="text-[#B8433A]">SYSTEM ERROR:</strong> {errorMessage}
+            </div>
           </div>
           <button
             onClick={() => setErrorMessage(null)}
-            className="text-xs text-rose-400 hover:text-rose-200 underline cursor-pointer"
+            className="text-xs text-[#B8433A] hover:text-[#E8F5E9] cursor-pointer"
           >
-            Dismiss
+            [DISMISS]
           </button>
         </div>
       )}
@@ -94,8 +96,8 @@ export const MemoryDashboard: React.FC = () => {
       />
 
       {/* Controls & Operation Input Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-span-5 space-y-4">
           <MemoryControls
             algorithm={algorithm}
             setAlgorithm={setAlgorithm}
@@ -146,3 +148,5 @@ export const MemoryDashboard: React.FC = () => {
     </div>
   );
 };
+
+export default MemoryDashboard;

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MemoryPlaybackController } from '../../hooks/useMemoryTimelinePlayback';
-import { Play, Pause, StepForward, StepBack, RotateCcw, FastForward } from 'lucide-react';
+import { Play, Pause, StepForward, StepBack, RotateCcw } from 'lucide-react';
 
 interface MemoryTimelineControlsProps {
   playback: MemoryPlaybackController;
@@ -23,74 +23,84 @@ export const MemoryTimelineControls: React.FC<MemoryTimelineControlsProps> = ({ 
   const speeds = [0.5, 1, 2, 4];
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Playback Buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={reset}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors cursor-pointer"
-            title="Reset to Tick 0"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-3 font-mono">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Playback Transport Buttons */}
+        <div className="flex items-center gap-1.5">
+          {isPlaying ? (
+            <button
+              onClick={togglePlay}
+              className="flex items-center gap-1 bg-[#0A0A0A] hover:bg-[#161813] text-[#DCDCAA] border border-[#DCDCAA] px-3 py-1.5 rounded-[2px] text-xs font-bold cursor-pointer transition-colors"
+            >
+              <Pause className="w-3.5 h-3.5 fill-[#DCDCAA]" />
+              <span>[❚❚ PAUSE]</span>
+            </button>
+          ) : (
+            <button
+              onClick={togglePlay}
+              className="flex items-center gap-1 bg-[#0A0A0A] hover:bg-[#161813] text-[#39FF6A] border border-[#39FF6A] px-3 py-1.5 rounded-[2px] text-xs font-bold cursor-pointer transition-colors"
+            >
+              <Play className="w-3.5 h-3.5 fill-[#39FF6A]" />
+              <span>[▶ RUN]</span>
+            </button>
+          )}
 
           <button
             onClick={stepBack}
             disabled={currentTick <= 0}
-            className="p-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-lg border border-slate-700 transition-colors cursor-pointer"
+            className="flex items-center gap-1 bg-[#0A0A0A] hover:bg-[#161813] disabled:opacity-20 text-[#E8F5E9] border border-[#2A2A26] hover:border-[#888888] px-2.5 py-1.5 rounded-[2px] text-xs cursor-pointer transition-colors"
             title="Step Back (1 Tick)"
           >
-            <StepBack className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={togglePlay}
-            className="flex items-center gap-1.5 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg shadow-md shadow-cyan-500/20 transition-all text-xs cursor-pointer"
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-4 h-4 fill-slate-950" />
-                <span>Pause</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 fill-slate-950" />
-                <span>Play</span>
-              </>
-            )}
+            <StepBack className="w-3.5 h-3.5" />
+            <span>[STEP -1]</span>
           </button>
 
           <button
             onClick={stepForward}
             disabled={currentTick >= maxTicks}
-            className="p-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-lg border border-slate-700 transition-colors cursor-pointer"
+            className="flex items-center gap-1 bg-[#0A0A0A] hover:bg-[#161813] disabled:opacity-20 text-[#E8F5E9] border border-[#2A2A26] hover:border-[#888888] px-2.5 py-1.5 rounded-[2px] text-xs cursor-pointer transition-colors"
             title="Step Forward (1 Tick)"
           >
-            <StepForward className="w-4 h-4" />
+            <StepForward className="w-3.5 h-3.5" />
+            <span>[STEP +1]</span>
+          </button>
+
+          <button
+            onClick={reset}
+            className="flex items-center gap-1 bg-[#0A0A0A] hover:bg-[#161813] text-[#888888] hover:text-[#E8F5E9] border border-[#2A2A26] hover:border-[#888888] px-2.5 py-1.5 rounded-[2px] text-xs cursor-pointer transition-colors"
+            title="Reset to Tick 0"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>[RESET]</span>
           </button>
         </div>
 
-        {/* Current Tick Display */}
-        <div className="flex items-center gap-2 bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg font-mono text-xs">
-          <span className="text-slate-400">Simulation Tick:</span>
-          <span className="text-cyan-300 font-bold text-sm">
-            {currentTick}
+        {/* Scrub Slider */}
+        <div className="flex-1 flex items-center gap-3">
+          <span className="text-xs text-[#888888] min-w-28 shrink-0">
+            TICK: <span className="font-bold text-[#39FF6A]">{currentTick}</span> / {maxTicks}T
           </span>
-          <span className="text-slate-500">/ {maxTicks}</span>
+          <input
+            type="range"
+            min={0}
+            max={Math.max(1, maxTicks)}
+            value={currentTick}
+            onChange={(e) => setTick(parseInt(e.target.value, 10) || 0)}
+            className="w-full h-1.5 bg-[#0A0A0A] border border-[#2A2A26] appearance-none cursor-pointer accent-[#39FF6A]"
+          />
         </div>
 
-        {/* Speed Selector */}
-        <div className="flex items-center gap-1 bg-slate-950/80 border border-slate-800 p-1 rounded-lg">
-          <FastForward className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-0.5" />
+        {/* Speed Multiplier Bank */}
+        <div className="flex items-center gap-1 bg-[#0A0A0A] p-1 border border-[#2A2A26] rounded-[2px]">
+          <span className="text-[10px] text-[#888888] px-1">RATE:</span>
           {speeds.map((s) => (
             <button
               key={`speed-${s}`}
               onClick={() => setSpeed(s)}
-              className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 text-[11px] rounded-[2px] cursor-pointer transition-colors ${
                 speed === s
-                  ? 'bg-cyan-500 text-slate-950 font-bold'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#12130F] border border-[#39FF6A] text-[#39FF6A] font-bold'
+                  : 'text-[#888888] hover:text-[#E8F5E9]'
               }`}
             >
               {s}x
@@ -98,25 +108,7 @@ export const MemoryTimelineControls: React.FC<MemoryTimelineControlsProps> = ({ 
           ))}
         </div>
       </div>
-
-      {/* Scrubber Range Slider */}
-      <div className="space-y-1 pt-1">
-        <input
-          type="range"
-          min={0}
-          max={maxTicks || 0}
-          value={currentTick}
-          onChange={(e) => setTick(parseInt(e.target.value) || 0)}
-          className="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-cyan-400 border border-slate-800"
-        />
-        <div className="flex justify-between text-[10px] font-mono text-slate-500 px-0.5">
-          <span>Start: Tick 0</span>
-          <span>
-            {maxTicks > 0 ? `${Math.round((currentTick / maxTicks) * 100)}% Complete` : '0%'}
-          </span>
-          <span>End: Tick {maxTicks}</span>
-        </div>
-      </div>
     </div>
   );
 };
+

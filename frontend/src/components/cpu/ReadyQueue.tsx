@@ -1,6 +1,4 @@
 import React from 'react';
-import { getProcessColor } from '../../utils/palette';
-import { Layers, ArrowRight } from 'lucide-react';
 
 interface ReadyQueueProps {
   readyQueue: string[];
@@ -8,41 +6,44 @@ interface ReadyQueueProps {
 
 export const ReadyQueue: React.FC<ReadyQueueProps> = ({ readyQueue }) => {
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-lg backdrop-blur-md">
-      <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 border-b border-[#2A2A26] pb-2 text-xs">
         <div className="flex items-center gap-2">
-          <Layers className="w-5 h-5 text-indigo-400" />
-          <h3 className="font-semibold text-slate-100 text-sm tracking-wide uppercase">
-            Ready Queue ({readyQueue.length})
+          <span className="text-[#DCDCAA]">&gt;&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            READY_QUEUE_BUFFER ({readyQueue.length})
           </h3>
         </div>
-        <span className="text-[10px] text-slate-500 font-mono">Head &rarr; Tail</span>
+        <span className="text-[11px] text-[#888888]">DISPATCH ORDER: HEAD &rarr; TAIL</span>
       </div>
 
       {readyQueue.length === 0 ? (
-        <div className="text-center py-5 text-xs text-slate-500 font-mono bg-slate-950/40 rounded-lg border border-dashed border-slate-800">
-          Ready queue is empty
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] py-4 text-center text-xs text-[#888888]">
+          HEAD &rarr; [EMPTY_QUEUE] &rarr; TAIL
         </div>
       ) : (
-        <div className="flex items-center gap-2 overflow-x-auto py-2">
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] p-3 overflow-x-auto flex items-center gap-2">
+          <span className="text-[11px] font-bold text-[#888888] shrink-0">HEAD &rarr;</span>
           {readyQueue.map((pid, idx) => {
-            const color = getProcessColor(pid);
             return (
               <React.Fragment key={pid}>
-                <div
-                  className={`flex flex-col items-center justify-center min-w-14 px-3 py-2 rounded-lg border ${color.bg} ${color.border} shadow-sm`}
-                >
-                  <span className={`text-xs font-bold font-mono ${color.text}`}>{pid}</span>
-                  <span className="text-[9px] text-slate-400 font-mono mt-0.5">#{idx + 1}</span>
+                <div className="flex items-center gap-1.5 bg-[#12130F] border border-[#DCDCAA] px-2.5 py-1 rounded-[2px] shrink-0">
+                  <span className="text-xs font-bold text-[#DCDCAA] tracking-wider">
+                    [{pid}]
+                  </span>
+                  <span className="text-[10px] text-[#888888]">#{idx + 1}</span>
                 </div>
                 {idx < readyQueue.length - 1 && (
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                  <span className="text-[#888888] text-xs shrink-0">&rarr;</span>
                 )}
               </React.Fragment>
             );
           })}
+          <span className="text-[11px] font-bold text-[#888888] shrink-0">&rarr; TAIL</span>
         </div>
       )}
     </div>
   );
 };
+

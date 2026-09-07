@@ -1,30 +1,36 @@
 /**
  * Deterministic visual palette mapping for process IDs and system states.
- * Keeps core domain models free of presentation-specific styling.
+ * Strictly adheres to the 6 console tokens:
+ * - #39FF6A (Running / Phosphor Green)
+ * - #DCDCAA (Ready / Amber)
+ * - #CE9178 (Terminated / Rust)
+ * - #FF6B35 (Warning / Context-Switch)
+ * - #B8433A (Punch-Hole Crimson)
+ * - #888888 (Muted Text / Labels)
  */
 
 export interface ColorBadge {
+  hex: string;
   bg: string;
   border: string;
   text: string;
-  glow: string;
 }
 
+// Deterministic cyclic assignments using exclusively the 6 console tokens & opacity variants
 const PROCESS_COLORS: ColorBadge[] = [
-  { bg: 'bg-emerald-500/20', border: 'border-emerald-500/60', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
-  { bg: 'bg-cyan-500/20', border: 'border-cyan-500/60', text: 'text-cyan-400', glow: 'shadow-cyan-500/20' },
-  { bg: 'bg-violet-500/20', border: 'border-violet-500/60', text: 'text-violet-400', glow: 'shadow-violet-500/20' },
-  { bg: 'bg-amber-500/20', border: 'border-amber-500/60', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
-  { bg: 'bg-rose-500/20', border: 'border-rose-500/60', text: 'text-rose-400', glow: 'shadow-rose-500/20' },
-  { bg: 'bg-indigo-500/20', border: 'border-indigo-500/60', text: 'text-indigo-400', glow: 'shadow-indigo-500/20' },
-  { bg: 'bg-pink-500/20', border: 'border-pink-500/60', text: 'text-pink-400', glow: 'shadow-pink-500/20' },
-  { bg: 'bg-teal-500/20', border: 'border-teal-500/60', text: 'text-teal-400', glow: 'shadow-teal-500/20' },
-  { bg: 'bg-orange-500/20', border: 'border-orange-500/60', text: 'text-orange-400', glow: 'shadow-orange-500/20' },
-  { bg: 'bg-blue-500/20', border: 'border-blue-500/60', text: 'text-blue-400', glow: 'shadow-blue-500/20' },
+  { hex: '#39FF6A', bg: 'bg-[#39FF6A]/10', border: 'border-[#39FF6A]', text: 'text-[#39FF6A]' },
+  { hex: '#DCDCAA', bg: 'bg-[#DCDCAA]/10', border: 'border-[#DCDCAA]', text: 'text-[#DCDCAA]' },
+  { hex: '#CE9178', bg: 'bg-[#CE9178]/10', border: 'border-[#CE9178]', text: 'text-[#CE9178]' },
+  { hex: '#FF6B35', bg: 'bg-[#FF6B35]/10', border: 'border-[#FF6B35]', text: 'text-[#FF6B35]' },
+  { hex: '#B8433A', bg: 'bg-[#B8433A]/15', border: 'border-[#B8433A]', text: 'text-[#B8433A]' },
+  { hex: '#39FF6A', bg: 'bg-[#39FF6A]/5', border: 'border-[#39FF6A]/60', text: 'text-[#39FF6A]/90' },
+  { hex: '#DCDCAA', bg: 'bg-[#DCDCAA]/5', border: 'border-[#DCDCAA]/60', text: 'text-[#DCDCAA]/90' },
+  { hex: '#CE9178', bg: 'bg-[#CE9178]/5', border: 'border-[#CE9178]/60', text: 'text-[#CE9178]/90' },
+  { hex: '#FF6B35', bg: 'bg-[#FF6B35]/5', border: 'border-[#FF6B35]/60', text: 'text-[#FF6B35]/90' },
+  { hex: '#B8433A', bg: 'bg-[#B8433A]/5', border: 'border-[#B8433A]/60', text: 'text-[#B8433A]/90' },
 ];
 
 export function getProcessColor(pid: string): ColorBadge {
-  // Simple deterministic hash based on PID characters
   let hash = 0;
   for (let i = 0; i < pid.length; i++) {
     hash = (hash << 5) - hash + pid.charCodeAt(i);
@@ -34,19 +40,19 @@ export function getProcessColor(pid: string): ColorBadge {
   return PROCESS_COLORS[index];
 }
 
-export function getStateBadgeColor(state: string): { bg: string; text: string; border: string } {
+export function getStateBadgeColor(state: string): { bg: string; text: string; border: string; hex: string } {
   switch (state) {
     case 'RUNNING':
-      return { bg: 'bg-emerald-500/20', text: 'text-emerald-300', border: 'border-emerald-500/50' };
+      return { hex: '#39FF6A', bg: 'bg-[#39FF6A]/10', text: 'text-[#39FF6A]', border: 'border-[#39FF6A]' };
     case 'READY':
-      return { bg: 'bg-cyan-500/20', text: 'text-cyan-300', border: 'border-cyan-500/50' };
+      return { hex: '#DCDCAA', bg: 'bg-[#DCDCAA]/10', text: 'text-[#DCDCAA]', border: 'border-[#DCDCAA]' };
     case 'WAITING':
-      return { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-amber-500/50' };
+      return { hex: '#FF6B35', bg: 'bg-[#FF6B35]/10', text: 'text-[#FF6B35]', border: 'border-[#FF6B35]' };
     case 'TERMINATED':
-      return { bg: 'bg-slate-700/50', text: 'text-slate-400', border: 'border-slate-600/50' };
+      return { hex: '#CE9178', bg: 'bg-[#CE9178]/10', text: 'text-[#CE9178]', border: 'border-[#CE9178]' };
     case 'NEW':
-      return { bg: 'bg-indigo-500/20', text: 'text-indigo-300', border: 'border-indigo-500/50' };
+      return { hex: '#888888', bg: 'bg-[#888888]/10', text: 'text-[#888888]', border: 'border-[#888888]' };
     default:
-      return { bg: 'bg-slate-800', text: 'text-slate-300', border: 'border-slate-700' };
+      return { hex: '#888888', bg: 'bg-[#888888]/10', text: 'text-[#888888]', border: 'border-[#888888]' };
   }
 }

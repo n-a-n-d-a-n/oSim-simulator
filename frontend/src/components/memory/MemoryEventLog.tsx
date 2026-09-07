@@ -1,31 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { MemoryEvent } from '../../types/memory';
-import { ScrollText, Search } from 'lucide-react';
 
 interface MemoryEventLogProps {
   events: MemoryEvent[];
   currentTick: number;
 }
 
+function getMemoryKeywordColor(type: string): string {
+  switch (type) {
+    case 'MEMORY_ALLOCATED':
+      return 'text-[#39FF6A]';
+    case 'MEMORY_BLOCK_SPLIT':
+    case 'MEMORY_BLOCK_MERGED':
+      return 'text-[#DCDCAA]';
+    case 'MEMORY_DEALLOCATED':
+      return 'text-[#CE9178]';
+    case 'MEMORY_ALLOCATION_FAILED':
+      return 'text-[#B8433A]';
+    default:
+      return 'text-[#FF6B35]';
+  }
+}
+
 export const MemoryEventLog: React.FC<MemoryEventLogProps> = ({ events, currentTick }) => {
   const [filterText, setFilterText] = useState<string>('');
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const getEventBadge = (type: string) => {
-    switch (type) {
-      case 'MEMORY_ALLOCATED':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-      case 'MEMORY_ALLOCATION_FAILED':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-      case 'MEMORY_DEALLOCATED':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'MEMORY_BLOCK_SPLIT':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-      case 'MEMORY_BLOCK_MERGED':
-        return 'bg-violet-500/20 text-violet-300 border-violet-500/30';
-      default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  };
+  }, [events]);
 
   const filteredEvents = events.filter((e) => {
     if (!filterText) return true;
@@ -38,56 +43,62 @@ export const MemoryEventLog: React.FC<MemoryEventLogProps> = ({ events, currentT
   });
 
   return (
-    <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <ScrollText className="w-4 h-4 text-cyan-400" />
-          Memory Event Stream ({events.length})
-        </h3>
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono flex flex-col h-72">
+      {/* Terminal Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2 border-b border-[#2A2A26] pb-2 shrink-0 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[#39FF6A]">&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            TTY02 // MEMORY_EVENT_STREAM [BAUD: 9600]
+          </h3>
+          <span className="w-1.5 h-3 bg-[#39FF6A] inline-block animate-pulse" />
+        </div>
+        <div className="flex items-center gap-3">
           <input
             type="text"
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            placeholder="Filter events..."
-            className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-36 sm:w-48"
+            placeholder="FILTER EVENTS..."
+            className="bg-[#0A0A0A] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-2 py-0.5 text-xs text-[#E8F5E9] placeholder-[#888888] outline-none w-36 sm:w-44"
           />
+          <span className="text-[11px] text-[#888888]">
+            SYNC_TICK: <span className="text-[#39FF6A]">{currentTick}</span>
+          </span>
         </div>
       </div>
 
-      <div className="max-h-64 overflow-y-auto space-y-2 pr-1 font-mono text-xs">
+      {/* Terminal Feed */}
+      <div
+        ref={scrollRef}
+        className="overflow-y-auto space-y-1.5 pr-1 flex-1 text-xs bg-[#0A0A0A] p-2.5 border border-[#2A2A26] rounded-[2px]"
+      >
         {filteredEvents.length === 0 ? (
-          <div className="p-6 text-center text-slate-500 text-xs">
-            No events match current filter or tick boundary.
+          <div className="text-[#888888] text-xs">
+            &gt; READY // AWAITING MEMORY OPERATIONS...
           </div>
         ) : (
           filteredEvents.map((evt) => {
+            const kwColor = getMemoryKeywordColor(evt.event_type);
             const isCurrentTick = evt.tick === currentTick;
+
             return (
               <div
                 key={evt.event_id}
-                className={`p-2 rounded-lg border transition-all ${
-                  isCurrentTick
-                    ? 'bg-slate-800/80 border-cyan-500/50 shadow-sm shadow-cyan-500/10'
-                    : 'bg-slate-950/40 border-slate-800/60 text-slate-400'
+                className={`flex items-start gap-2 leading-relaxed ${
+                  isCurrentTick ? 'bg-[#161813] text-[#E8F5E9]' : 'text-[#888888]'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded border font-semibold ${getEventBadge(
-                      evt.event_type
-                    )}`}
-                  >
-                    {evt.event_type}
+                <span className="text-[#888888] shrink-0 select-none">
+                  &gt; [T={String(evt.tick).padStart(2, '0')}]
+                </span>
+                <div className="flex-1">
+                  <span className={`font-bold mr-2 ${kwColor}`}>
+                    [{evt.event_type}]
                   </span>
-                  <span className="text-[10px] text-slate-500 font-bold">
-                    TICK {evt.tick}
+                  <span className={isCurrentTick ? 'text-[#E8F5E9]' : 'text-[#888888]'}>
+                    {evt.description}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-200 leading-snug">
-                  {evt.description}
-                </p>
               </div>
             );
           })
@@ -96,3 +107,4 @@ export const MemoryEventLog: React.FC<MemoryEventLogProps> = ({ events, currentT
     </div>
   );
 };
+
