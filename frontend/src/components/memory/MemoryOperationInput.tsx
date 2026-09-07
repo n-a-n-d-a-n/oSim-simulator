@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MemoryOperationInput as MemOpType, MemoryOperationType } from '../../types/memory';
-import { Plus, Trash2, ArrowDownUp, ListOrdered } from 'lucide-react';
+import { Plus, Trash2, ArrowDownUp } from 'lucide-react';
 
 interface MemoryOperationInputProps {
   operations: MemOpType[];
@@ -41,49 +41,52 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <ListOrdered className="w-4 h-4 text-cyan-400" />
-          Scheduled Memory Operations ({operations.length})
-        </h3>
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono space-y-3">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2A2A26] pb-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[#39FF6A]">&gt;&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            SCHEDULED_MEMORY_OPERATIONS ({operations.length})
+          </h3>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleSortByTick}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 bg-slate-800/80 px-2 py-1 rounded border border-slate-700 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-xs text-[#888888] hover:text-[#E8F5E9] bg-[#0A0A0A] px-2 py-1 rounded-[2px] border border-[#2A2A26] hover:border-[#888888] transition-colors cursor-pointer"
             title="Sort chronologically by simulation tick"
           >
             <ArrowDownUp className="w-3 h-3" />
-            Sort by Tick
+            <span>[SORT]</span>
           </button>
           <button
             onClick={handleAddOperation}
-            className="flex items-center gap-1 text-xs text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded border border-cyan-500/30 transition-colors font-medium cursor-pointer"
+            className="flex items-center gap-1 text-xs text-[#39FF6A] bg-[#12130F] hover:bg-[#161813] px-2.5 py-1 rounded-[2px] border border-[#39FF6A]/60 hover:border-[#39FF6A] transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            Add Operation
+            <span>[+ ADD OP]</span>
           </button>
         </div>
       </div>
 
       {operations.length === 0 ? (
-        <div className="p-6 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-lg">
-          No operations defined. Click "Add Operation" or load an educational preset above.
+        <div className="p-4 text-center text-xs text-[#888888] border border-dashed border-[#2A2A26] rounded-[2px]">
+          NO OPERATIONS DEFINED // CLICK [+ ADD OP] OR LOAD A ROM WORKLOAD BANK ABOVE
         </div>
       ) : (
         <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1 font-mono text-xs">
-          <div className="grid grid-cols-12 gap-2 text-[11px] text-slate-400 font-semibold px-2 py-1 bg-slate-950/60 rounded">
-            <span className="col-span-2">Tick</span>
-            <span className="col-span-3">Action</span>
-            <span className="col-span-3">Request ID</span>
-            <span className="col-span-3">Size</span>
-            <span className="col-span-1 text-center">Del</span>
+          <div className="grid grid-cols-12 gap-2 text-[11px] text-[#888888] font-semibold px-2 py-1 bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px]">
+            <span className="col-span-2">TICK</span>
+            <span className="col-span-3">ACTION</span>
+            <span className="col-span-3">REQ_ID</span>
+            <span className="col-span-3">SIZE (U)</span>
+            <span className="col-span-1 text-center">DEL</span>
           </div>
 
           {operations.map((op, idx) => (
             <div
               key={`op-${idx}`}
-              className="grid grid-cols-12 gap-2 items-center px-2 py-1.5 bg-slate-950/40 hover:bg-slate-950/70 border border-slate-800/60 rounded transition-colors"
+              className="grid grid-cols-12 gap-2 items-center px-2 py-1.5 bg-[#0A0A0A] hover:bg-[#161813] border border-[#2A2A26] rounded-[2px] transition-colors"
             >
               {/* Tick */}
               <div className="col-span-2">
@@ -91,8 +94,8 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
                   type="number"
                   min={0}
                   value={op.tick}
-                  onChange={(e) => handleUpdate(idx, 'tick', Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-slate-100 text-xs focus:outline-none focus:border-cyan-500"
+                  onChange={(e) => handleUpdate(idx, 'tick', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                  className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-1.5 py-1 text-[#E8F5E9] text-xs outline-none"
                 />
               </div>
 
@@ -103,12 +106,12 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
                   onChange={(e) =>
                     handleUpdate(idx, 'operation_type', e.target.value as MemoryOperationType)
                   }
-                  className={`w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-xs focus:outline-none focus:border-cyan-500 ${
-                    op.operation_type === 'ALLOCATE' ? 'text-emerald-400' : 'text-blue-400'
+                  className={`w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-1.5 py-1 text-xs outline-none ${
+                    op.operation_type === 'ALLOCATE' ? 'text-[#39FF6A]' : 'text-[#CE9178]'
                   }`}
                 >
-                  <option value="ALLOCATE">ALLOCATE</option>
-                  <option value="DEALLOCATE">DEALLOCATE</option>
+                  <option value="ALLOCATE" className="bg-[#0A0A0A] text-[#39FF6A]">ALLOCATE</option>
+                  <option value="DEALLOCATE" className="bg-[#0A0A0A] text-[#CE9178]">DEALLOCATE</option>
                 </select>
               </div>
 
@@ -119,7 +122,7 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
                   value={op.request_id}
                   onChange={(e) => handleUpdate(idx, 'request_id', e.target.value.trim().toUpperCase())}
                   placeholder="e.g. P1"
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 uppercase"
+                  className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-1.5 py-1 text-[#E8F5E9] text-xs outline-none uppercase"
                 />
               </div>
 
@@ -131,12 +134,12 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
                     min={1}
                     value={op.size ?? 100}
                     onChange={(e) =>
-                      handleUpdate(idx, 'size', Math.max(1, parseInt(e.target.value) || 1))
+                      handleUpdate(idx, 'size', Math.max(1, parseInt(e.target.value, 10) || 1))
                     }
-                    className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-slate-100 text-xs focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-1.5 py-1 text-[#E8F5E9] text-xs outline-none"
                   />
                 ) : (
-                  <span className="text-slate-600 text-[11px] block text-center py-1">N/A</span>
+                  <span className="text-[#888888] text-[11px] block text-center py-1">N/A</span>
                 )}
               </div>
 
@@ -144,7 +147,7 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
               <div className="col-span-1 text-center">
                 <button
                   onClick={() => handleRemoveOperation(idx)}
-                  className="text-slate-500 hover:text-rose-400 transition-colors p-1 cursor-pointer"
+                  className="text-[#888888] hover:text-[#B8433A] transition-colors p-1 cursor-pointer"
                   title="Remove operation"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -157,3 +160,4 @@ export const MemoryOperationInput: React.FC<MemoryOperationInputProps> = ({
     </div>
   );
 };
+

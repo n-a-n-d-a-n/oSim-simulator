@@ -1,7 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import type { GanttSegment } from '../../types/cpu';
-import { getProcessColor } from '../../utils/palette';
-import { BarChart3 } from 'lucide-react';
 
 interface GanttChartProps {
   segments: GanttSegment[];
@@ -16,136 +14,254 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   currentTick,
   onSeekTick,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   if (totalTime <= 0 || segments.length === 0) {
     return (
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 text-center text-slate-500 text-sm">
-        Run simulation to view Gantt timeline.
+      <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-6 text-center text-[#888888] text-xs font-mono">
+        NO SIGNAL // RUN SIMULATION TO ENGAGE OSCILLOSCOPE
       </div>
     );
   }
 
-  const cursorPercent = Math.min(100, Math.max(0, (currentTick / totalTime) * 100));
+  const svgWidth = 1000;
+  const svgHeight = 140;
+  const paddingX = 20;
+  const plotWidth = svgWidth - paddingX * 2;
+  const baselineY = 110;
+  const activeY = 38;
+
+  // Build the continuous oscilloscope step-line path
+  let pathD = '';
+  let lastY = baselineY;
+
+  // We also track context-switch markers and process labels
+  const csMarkers: { x: number; duration: number; start: number }[] = [];
+  const processLabels: { x: number; pid: string; start: number; end: number }[] = [];
+
+  segments.forEach((seg, idx) => {
+    const startX = paddingX + (seg.start_time / totalTime) * plotWidth;
+    const endX = paddingX + (seg.end_time / totalTime) * plotWidth;
+
+    let targetY = baselineY;
+    if (seg.is_context_switch) {
+      targetY = baselineY;
+      csMarkers.push({ x: (startX + endX) / 2, duration: seg.duration, start: seg.start_time });
+    } else if (!seg.is_idle && seg.pid) {
+      // Deterministic Y level offset per PID for multi-process distinct voltage levels
+      const pidNum = parseInt(seg.pid.replace(/\D/g, ''), 10) || 1;
+      const levelOffset = ((pidNum - 1) % 4) * 12;
+      targetY = activeY + levelOffset;
+      processLabels.push({ x: (startX + endX) / 2, pid: seg.pid, start: seg.start_time, end: seg.end_time });
+    }
+
+    if (idx === 0) {
+      pathD += `M ${startX.toFixed(1)} ${targetY.toFixed(1)}`;
+    } else {
+      // Step: vertical edge from lastY to targetY, then horizontal to endX
+      pathD += ` L ${startX.toFixed(1)} ${targetY.toFixed(1)}`;
+    }
+    pathD += ` L ${endX.toFixed(1)} ${targetY.toFixed(1)}`;
+    lastY = targetY;
+  });
+
+  // Current scanline cursor X position
+  const cursorX = paddingX + (Math.min(currentTick, totalTime) / totalTime) * plotWidth;
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clickRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const targetTick = Math.round(clickRatio * totalTime);
+    onSeekTick(targetTick);
+  };
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-lg backdrop-blur-md">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 select-none">
+      {/* Instrument Header / Channel Status */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-[#2A2A26] pb-2.5 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-indigo-400" />
-          <h3 className="font-semibold text-slate-100 text-sm tracking-wide uppercase">
-            CPU Execution Gantt Chart
-          </h3>
+          <span className="w-2 h-2 rounded-full bg-[#39FF6A] inline-block animate-pulse" />
+          <span className="font-medium text-[#E8F5E9] tracking-wider">
+            OSCILLOSCOPE // CH1: CPU_EXEC_SIGNAL
+          </span>
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/80 inline-block" />
-            <span className="text-slate-400">Context Switch (CS)</span>
+        <div className="flex items-center gap-4 text-[#888888] text-[11px]">
+          <div>
+            TRACE: <span className="text-[#39FF6A]">#39FF6A (ACTIVE)</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-slate-800 border border-slate-700 inline-block" />
-            <span className="text-slate-400">CPU Idle</span>
+          <div>
+            MARKER: <span className="text-[#FF6B35]">#FF6B35 (CS OVERHEAD)</span>
           </div>
-          <div className="text-slate-400 font-mono">
-            Total: <span className="text-slate-200 font-semibold">{totalTime}</span> ticks
+          <div>
+            TOTAL: <span className="text-[#E8F5E9] font-bold">{totalTime}</span> TICKS
           </div>
         </div>
       </div>
 
-      {/* Interactive Gantt Bar Container */}
-      <div className="relative pt-2 pb-6 select-none">
-        {/* Playback Cursor Line */}
-        <div
-          className="absolute top-0 bottom-6 w-0.5 bg-rose-500 z-30 pointer-events-none transition-all duration-100 flex flex-col items-center"
-          style={{ left: `${cursorPercent}%` }}
+      {/* CRT Display Frame */}
+      <div
+        ref={containerRef}
+        onPointerDown={handlePointerDown}
+        className="relative bg-[#080907] border border-[#2A2A26] rounded-[2px] p-1 cursor-crosshair overflow-hidden"
+      >
+        <svg
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          className="w-full h-36 block"
+          preserveAspectRatio="none"
         >
-          <div className="w-2.5 h-2.5 bg-rose-500 rounded-full -mt-1 shadow-md shadow-rose-500/50" />
-          <div className="bg-rose-600 text-white font-mono text-[9px] px-1 rounded absolute -top-5 shadow">
-            t={currentTick}
-          </div>
-        </div>
+          <defs>
+            {/* Grid Pattern */}
+            <pattern id="reticleGrid" width="40" height="20" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="40" y2="0" stroke="#1A1C16" strokeWidth="1" />
+              <line x1="0" y1="0" x2="0" y2="20" stroke="#1A1C16" strokeWidth="1" />
+            </pattern>
+            {/* Subtle phosphor trail glow under signal */}
+            <linearGradient id="traceFade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#39FF6A" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#39FF6A" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
 
-        {/* Segments Flex Bar */}
+          {/* CRT Reticle Grid */}
+          <rect x={paddingX} y="8" width={plotWidth} height={svgHeight - 16} fill="url(#reticleGrid)" />
+
+          {/* Horizontal Reference Voltages / States */}
+          <line
+            x1={paddingX}
+            y1={activeY}
+            x2={svgWidth - paddingX}
+            y2={activeY}
+            stroke="#2A2A26"
+            strokeDasharray="4 4"
+            strokeWidth="1"
+          />
+          <line
+            x1={paddingX}
+            y1={baselineY}
+            x2={svgWidth - paddingX}
+            y2={baselineY}
+            stroke="#2A2A26"
+            strokeWidth="1"
+          />
+
+          {/* Y-Axis Labels */}
+          <text x={paddingX - 4} y={activeY + 3} textAnchor="end" fill="#888888" fontSize="8" fontFamily="monospace">
+            BUSY
+          </text>
+          <text x={paddingX - 4} y={baselineY + 3} textAnchor="end" fill="#888888" fontSize="8" fontFamily="monospace">
+            IDLE
+          </text>
+
+          {/* Context-Switch Overhead Markers (Dashed Orange Lines crossing trace) */}
+          {csMarkers.map((cs, idx) => (
+            <g key={`cs-${idx}`}>
+              <line
+                x1={cs.x}
+                y1={12}
+                x2={cs.x}
+                y2={baselineY + 8}
+                stroke="#FF6B35"
+                strokeWidth="1.5"
+                strokeDasharray="3 3"
+              />
+              <rect x={cs.x - 12} y={10} width="24" height="12" fill="#12130F" stroke="#FF6B35" strokeWidth="1" />
+              <text
+                x={cs.x}
+                y={19}
+                textAnchor="middle"
+                fill="#FF6B35"
+                fontSize="7.5"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                CS
+              </text>
+            </g>
+          ))}
+
+          {/* Stepped Phosphor Green Oscilloscope Trace */}
+          {/* Shaded phosphor under active waveform */}
+          <path
+            d={`${pathD} L ${paddingX + plotWidth} ${baselineY} L ${paddingX} ${baselineY} Z`}
+            fill="url(#traceFade)"
+          />
+
+          {/* Sharp phosphor step trace with subtle 1px glow */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#39FF6A"
+            strokeWidth="2"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
+            style={{ filter: 'drop-shadow(0 0 1px #39FF6A)' }}
+          />
+
+          {/* Process Labels on the Waveform Pulses */}
+          {processLabels.map((pl, idx) => (
+            <g key={`pl-${idx}`}>
+              <text
+                x={pl.x}
+                y={26}
+                textAnchor="middle"
+                fill="#39FF6A"
+                fontSize="9"
+                fontFamily="monospace"
+                fontWeight="bold"
+              >
+                {pl.pid}
+              </text>
+            </g>
+          ))}
+
+          {/* Live Scanline / Sweep Cursor at currentTick */}
+          <line
+            x1={cursorX}
+            y1={8}
+            x2={cursorX}
+            y2={svgHeight - 10}
+            stroke="#39FF6A"
+            strokeWidth="1.5"
+          />
+          {/* Reticle pip at trace height */}
+          <circle cx={cursorX} cy={lastY} r="3" fill="#0A0A0A" stroke="#39FF6A" strokeWidth="1.5" />
+
+          {/* Top cursor readout badge */}
+          <g transform={`translate(${Math.max(paddingX, Math.min(cursorX - 25, svgWidth - paddingX - 50))}, 2)`}>
+            <rect width="50" height="12" fill="#12130F" stroke="#39FF6A" strokeWidth="1" />
+            <text x="25" y="9" textAnchor="middle" fill="#39FF6A" fontSize="8" fontFamily="monospace">
+              T={currentTick}
+            </text>
+          </g>
+        </svg>
+
+        {/* Scanline Sweep Animation Indicator */}
         <div
-          className="h-12 w-full flex rounded-lg overflow-hidden border border-slate-700/80 bg-slate-950 relative cursor-pointer shadow-inner"
-          onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const targetRatio = Math.max(0, Math.min(1, clickX / rect.width));
-            const targetTick = Math.round(targetRatio * totalTime);
-            onSeekTick(targetTick);
+          className="absolute top-0 bottom-0 pointer-events-none transition-all duration-75"
+          style={{
+            left: `${((Math.min(currentTick, totalTime) / totalTime) * 100).toFixed(2)}%`,
           }}
         >
-          {segments.map((seg, idx) => {
-            const widthPercent = (seg.duration / totalTime) * 100;
-            const isCursorInside = currentTick >= seg.start_time && currentTick < seg.end_time;
-
-            if (seg.is_idle) {
-              return (
-                <div
-                  key={idx}
-                  style={{ width: `${widthPercent}%` }}
-                  className={`h-full flex items-center justify-center border-r border-slate-800 bg-slate-900/60 text-slate-500 text-[11px] font-mono transition-opacity ${
-                    isCursorInside ? 'ring-2 ring-rose-400/80 z-20' : ''
-                  }`}
-                  title={`IDLE [${seg.start_time} - ${seg.end_time}]`}
-                >
-                  <span className="truncate px-1">IDLE ({seg.duration})</span>
-                </div>
-              );
-            }
-
-            if (seg.is_context_switch) {
-              return (
-                <div
-                  key={idx}
-                  style={{ width: `${widthPercent}%` }}
-                  className={`h-full flex items-center justify-center border-r border-amber-500/50 bg-amber-500/20 text-amber-300 text-[10px] font-mono font-semibold transition-opacity ${
-                    isCursorInside ? 'ring-2 ring-rose-400/80 z-20' : ''
-                  }`}
-                  title={`Context Switch [${seg.start_time} - ${seg.end_time}]`}
-                >
-                  <span className="truncate px-0.5">CS ({seg.duration})</span>
-                </div>
-              );
-            }
-
-            const color = seg.pid ? getProcessColor(seg.pid) : null;
-            return (
-              <div
-                key={idx}
-                style={{ width: `${widthPercent}%` }}
-                className={`h-full flex flex-col items-center justify-center border-r border-slate-800 ${
-                  color ? color.bg : 'bg-indigo-500/20'
-                } ${
-                  color ? color.text : 'text-indigo-200'
-                } transition-all relative overflow-hidden group ${
-                  isCursorInside ? 'ring-2 ring-rose-400/80 z-20 brightness-125' : ''
-                }`}
-                title={`${seg.pid} [${seg.start_time} - ${seg.end_time}] (${seg.duration} ticks)`}
-              >
-                <span className="font-bold text-xs tracking-wider">{seg.pid}</span>
-                <span className="text-[9px] opacity-75 font-mono">{seg.duration}t</span>
-              </div>
-            );
-          })}
+          <div className="w-[1px] h-full bg-[#39FF6A] opacity-40" />
         </div>
+      </div>
 
-        {/* Timeline Axis Ticks */}
-        <div className="relative w-full h-4 text-[10px] font-mono text-slate-500 mt-1">
-          {segments.map((seg, idx) => {
-            const leftPercent = (seg.start_time / totalTime) * 100;
-            return (
-              <span
-                key={idx}
-                className="absolute -translate-x-1/2"
-                style={{ left: `${leftPercent}%` }}
-              >
-                {seg.start_time}
-              </span>
-            );
-          })}
-          <span className="absolute right-0 translate-x-1/2">{totalTime}</span>
+      {/* Axis Scale and Diagnostic Readings */}
+      <div className="flex items-center justify-between mt-2 px-1 text-[11px] font-mono text-[#888888]">
+        <div>
+          SCALE: <span className="text-[#E8F5E9]">1 TICK/DIV</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>0T</span>
+          <span>&larr; TIMELINE SPAN &rarr;</span>
+          <span>{totalTime}T</span>
+        </div>
+        <div>
+          SCAN_POS: <span className="text-[#39FF6A]">t={currentTick}</span>
         </div>
       </div>
     </div>
   );
 };
+

@@ -1,28 +1,73 @@
 @import "tailwindcss";
 
+:root {
+  --bg-page: #0A0A0A;
+  --surface-panel: #12130F;
+  --border-panel: #2A2A26;
+  --text-primary: #E8F5E9;
+  --text-muted: #888888;
+  --accent-running: #39FF6A;
+  --accent-ready: #DCDCAA;
+  --accent-terminated: #CE9178;
+  --accent-warning: #FF6B35;
+  --accent-punch: #B8433A;
+}
+
 @layer base {
+  * {
+    border-color: #2A2A26;
+  }
+
   body {
-    background-color: #0b0f19;
-    color: #f1f5f9;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #0A0A0A;
+    color: #E8F5E9;
+    font-family: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
   }
 }
 
-/* Custom scrollbar */
+/* Custom retro systems scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0A0A0A;
+  border-left: 1px solid #2A2A26;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: #2A2A26;
+  border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #39FF6A;
 }
+
+/* Retro Systems Console utility classes */
+.retro-panel {
+  background-color: #12130F;
+  border: 1px solid #2A2A26;
+  border-radius: 4px;
+}
+
+.retro-subpanel {
+  background-color: #0A0A0A;
+  border: 1px solid #2A2A26;
+  border-radius: 2px;
+}
+
+.oscilloscope-grid {
+  background-image: 
+    linear-gradient(to right, rgba(42, 42, 38, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 42, 38, 0.45) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+

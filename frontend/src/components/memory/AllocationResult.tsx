@@ -1,6 +1,5 @@
 import React from 'react';
 import type { OperationResultSnapshot, MemoryMetricsSnapshot } from '../../types/memory';
-import { CheckCircle, XCircle, Trash2, Info } from 'lucide-react';
 
 interface AllocationResultProps {
   result: OperationResultSnapshot | null;
@@ -10,9 +9,8 @@ interface AllocationResultProps {
 export const AllocationResult: React.FC<AllocationResultProps> = ({ result, metrics }) => {
   if (!result) {
     return (
-      <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl text-slate-400 text-xs flex items-center gap-2">
-        <Info className="w-4 h-4 text-slate-500 flex-shrink-0" />
-        <span>No operations executed at current tick. Step timeline forward to view operation results.</span>
+      <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-3 text-[#888888] text-xs font-mono">
+        &gt; NO DISPATCH EXECUTED AT CURRENT TICK // ADVANCE TIMELINE TRANSPORT
       </div>
     );
   }
@@ -22,13 +20,12 @@ export const AllocationResult: React.FC<AllocationResultProps> = ({ result, metr
   if (!isAllocate) {
     // DEALLOCATE Operation
     return (
-      <div className="p-4 bg-blue-950/30 border border-blue-500/30 rounded-xl space-y-1">
-        <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm">
-          <Trash2 className="w-4 h-4" />
-          <span>Deallocation Executed</span>
+      <div className="bg-[#12130F] border border-[#CE9178] rounded-[4px] p-3 font-mono space-y-1">
+        <div className="flex items-center gap-2 text-[#CE9178] font-bold text-xs">
+          <span>&gt;&gt; [DEALLOCATE] EXECUTION_OK</span>
         </div>
-        <p className="text-xs text-blue-200/90 font-mono">
-          Process <strong>{result.request_id}</strong> released {result.allocated_size || 0} units starting at address {result.allocated_start_address ?? 0}. Adjacent free partitions were automatically coalesced.
+        <p className="text-[11px] text-[#888888] leading-relaxed">
+          PROCESS <span className="text-[#CE9178] font-bold">[{result.request_id}]</span> RELEASED {result.allocated_size || 0}U STARTING AT ADDR {result.allocated_start_address ?? 0}. ADJACENT FREE HOLES COALESCED.
         </p>
       </div>
     );
@@ -38,15 +35,14 @@ export const AllocationResult: React.FC<AllocationResultProps> = ({ result, metr
     // Successful ALLOCATE Operation
     const endAddress = (result.allocated_start_address ?? 0) + (result.allocated_size ?? 0);
     return (
-      <div className="p-4 bg-emerald-950/30 border border-emerald-500/30 rounded-xl space-y-1">
-        <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
-          <CheckCircle className="w-4 h-4" />
-          <span>✓ Allocation Successful</span>
+      <div className="bg-[#12130F] border border-[#39FF6A] rounded-[4px] p-3 font-mono space-y-1">
+        <div className="flex items-center gap-2 text-[#39FF6A] font-bold text-xs">
+          <span>&gt;&gt; [ALLOCATE] SUCCESSFUL</span>
         </div>
-        <div className="text-xs text-emerald-200/90 font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>Process: <strong>{result.request_id}</strong></span>
-          <span>Size: <strong>{result.size} units</strong></span>
-          <span>Address Range: <strong>[{result.allocated_start_address}, {endAddress})</strong></span>
+        <div className="text-[11px] text-[#888888] flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>PROCESS: <strong className="text-[#39FF6A]">[{result.request_id}]</strong></span>
+          <span>SIZE: <strong className="text-[#E8F5E9]">{result.size}U</strong></span>
+          <span>ADDR RANGE: <strong className="text-[#39FF6A]">[{result.allocated_start_address}, {endAddress})</strong></span>
         </div>
       </div>
     );
@@ -54,29 +50,26 @@ export const AllocationResult: React.FC<AllocationResultProps> = ({ result, metr
 
   // Failed ALLOCATE Operation
   return (
-    <div className="p-4 bg-rose-950/40 border border-rose-500/40 rounded-xl space-y-2">
-      <div className="flex items-center gap-2 text-rose-400 font-semibold text-sm">
-        <XCircle className="w-4 h-4" />
-        <span>✗ Allocation Failed</span>
+    <div className="bg-[#12130F] border border-[#B8433A] rounded-[4px] p-3 font-mono space-y-2">
+      <div className="flex items-center gap-2 text-[#B8433A] font-bold text-xs">
+        <span>&gt;&gt; [ALLOCATE] FAILED // INSUFFICIENT CONTIGUOUS SPACE</span>
       </div>
 
-      <div className="text-xs text-rose-200/90 font-mono flex flex-wrap items-center gap-x-4 gap-y-1">
-        <span>Requested: <strong>{result.size} units</strong></span>
+      <div className="text-[11px] text-[#888888] flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span>REQUESTED: <strong className="text-[#B8433A]">{result.size}U</strong></span>
         {metrics && (
           <>
-            <span>Total Free Memory: <strong>{metrics.free_memory} units</strong></span>
-            <span>Largest Free Block: <strong>{metrics.largest_free_block} units</strong></span>
+            <span>TOTAL FREE: <strong className="text-[#DCDCAA]">{metrics.free_memory}U</strong></span>
+            <span>LARGEST HOLE: <strong className="text-[#FF6B35]">{metrics.largest_free_block}U</strong></span>
           </>
         )}
       </div>
 
-      <div className="p-2.5 bg-rose-950/60 rounded border border-rose-900/50 text-xs text-rose-300">
-        <p className="font-semibold text-rose-200 mb-0.5">Educational Explanation:</p>
-        <p>{result.reason || 'No contiguous free block is large enough to satisfy this request.'}</p>
-        <p className="mt-1 text-[11px] text-rose-400/90">
-          Note: Having sufficient total free memory does NOT guarantee that a contiguous allocation succeeds. All units must be in a single continuous address interval.
-        </p>
+      <div className="p-2 bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] text-[10px] text-[#888888]">
+        <span className="text-[#B8433A] font-bold">DIAGNOSTIC: </span>
+        {result.reason || 'No single contiguous free partition is large enough.'} Having sufficient total free memory does not guarantee contiguous allocation.
       </div>
     </div>
   );
 };
+

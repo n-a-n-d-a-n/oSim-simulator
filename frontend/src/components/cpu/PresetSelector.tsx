@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { PresetItem } from '../../types/cpu';
 import { fetchWorkloadPresets } from '../../services/cpuApi';
-import { BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface PresetSelectorProps {
   onSelectPreset: (preset: PresetItem) => void;
@@ -41,22 +41,26 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   }, []);
 
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-lg backdrop-blur-md">
-      <div className="flex items-center gap-2 mb-3">
-        <BookOpen className="w-5 h-5 text-indigo-400" />
-        <h3 className="font-semibold text-slate-100 text-sm tracking-wide uppercase">
-          Canonical Textbook Presets
-        </h3>
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 border-b border-[#2A2A26] pb-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[#39FF6A]">&gt;&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            ROM_WORKLOAD_BANKS ({presets.length})
+          </h3>
+        </div>
+        <span className="text-[10px] text-[#888888]">CANONICAL BENCHMARKS</span>
       </div>
 
       {loading && (
-        <div className="text-xs text-slate-400 py-2 animate-pulse">
-          Fetching presets from backend...
+        <div className="text-xs text-[#888888] py-2">
+          &gt; FETCHING ROM DATA BANKS...
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded">
+        <div className="flex items-center gap-2 text-xs text-[#FF6B35] bg-[#FF6B35]/10 border border-[#FF6B35] p-2 rounded-[2px] mb-3">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -69,26 +73,31 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             <button
               key={preset.id}
               onClick={() => onSelectPreset(preset)}
-              className={`text-left p-2.5 rounded-lg border transition-all duration-150 flex flex-col justify-between ${
+              className={`text-left p-2.5 rounded-[2px] border transition-colors flex flex-col justify-between cursor-pointer ${
                 isSelected
-                  ? 'bg-indigo-600/20 border-indigo-500/70 shadow-indigo-500/10 shadow-sm'
-                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800/80 hover:border-slate-600'
+                  ? 'bg-[#161813] border-[#39FF6A] text-[#E8F5E9]'
+                  : 'bg-[#0A0A0A] border-[#2A2A26] hover:border-[#888888] text-[#888888]'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
-                <span className="font-medium text-xs text-slate-200">{preset.name}</span>
-                {isSelected && <CheckCircle className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />}
+                <span className={`text-xs font-bold ${isSelected ? 'text-[#39FF6A]' : 'text-[#E8F5E9]'}`}>
+                  [{preset.name}]
+                </span>
+                {isSelected && (
+                  <span className="text-[10px] text-[#39FF6A] border border-[#39FF6A] px-1 rounded-[2px]">
+                    ACTIVE
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-slate-400 line-clamp-2 mt-1 mb-2">
+              <p className="text-[11px] text-[#888888] line-clamp-2 my-1.5">
                 {preset.description}
               </p>
-              <div className="flex items-center gap-1.5 mt-auto">
-                <span className="text-[10px] bg-slate-800 text-indigo-300 font-mono px-1.5 py-0.5 rounded border border-slate-700">
-                  {preset.recommended_algorithm}
+              <div className="flex items-center gap-2 text-[10px] mt-auto pt-1 border-t border-[#2A2A26]">
+                <span className="text-[#DCDCAA]">
+                  ALG: {preset.recommended_algorithm}
                 </span>
-                <span className="text-[10px] text-slate-400">
-                  {preset.processes.length} processes
-                </span>
+                <span>&bull;</span>
+                <span>{preset.processes.length} PROCS</span>
               </div>
             </button>
           );
@@ -97,3 +106,4 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     </div>
   );
 };
+

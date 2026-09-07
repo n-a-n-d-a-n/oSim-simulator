@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { MemoryPresetItem } from '../../types/memory';
 import { fetchMemoryPresets } from '../../services/memoryApi';
-import { Sparkles, BookOpen } from 'lucide-react';
 
 interface MemoryPresetSelectorProps {
   onSelectPreset: (preset: MemoryPresetItem) => void;
@@ -29,23 +28,23 @@ export const MemoryPresetSelector: React.FC<MemoryPresetSelectorProps> = ({
 
   if (isLoading) {
     return (
-      <div className="p-3 bg-slate-900/40 rounded-lg text-slate-400 text-xs animate-pulse">
-        Loading educational workloads...
+      <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-3 text-[#888888] text-xs font-mono">
+        &gt; FETCHING MEMORY ROM WORKLOADS...
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-violet-400" />
-          Educational Workload Presets
-        </h3>
-        <span className="text-xs text-slate-400 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-amber-400" />
-          Presets A - G
-        </span>
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 border-b border-[#2A2A26] pb-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[#39FF6A]">&gt;&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            ROM_MEMORY_WORKLOAD_BANKS ({presets.length})
+          </h3>
+        </div>
+        <span className="text-[10px] text-[#888888]">CANONICAL PARTITION PRESETS A - G</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
@@ -55,24 +54,28 @@ export const MemoryPresetSelector: React.FC<MemoryPresetSelectorProps> = ({
             <button
               key={preset.id}
               onClick={() => onSelectPreset(preset)}
-              className={`text-left p-2.5 rounded-lg border transition-all text-xs cursor-pointer ${
+              className={`text-left p-2.5 rounded-[2px] border transition-colors text-xs cursor-pointer flex flex-col justify-between ${
                 isSelected
-                  ? 'bg-violet-500/20 border-violet-500 text-slate-100 shadow-md shadow-violet-500/20'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-900'
+                  ? 'bg-[#161813] border-[#39FF6A] text-[#E8F5E9]'
+                  : 'bg-[#0A0A0A] border-[#2A2A26] hover:border-[#888888] text-[#888888]'
               }`}
             >
               <div className="flex items-center justify-between gap-1 mb-1">
-                <span className="font-semibold text-slate-200 truncate">{preset.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-violet-300 border border-slate-700 font-mono flex-shrink-0">
-                  {preset.category}
+                <span className={`font-semibold truncate ${isSelected ? 'text-[#39FF6A]' : 'text-[#E8F5E9]'}`}>
+                  [{preset.name}]
+                </span>
+                <span className="text-[10px] text-[#888888] shrink-0 font-mono">
+                  [{preset.category.toUpperCase()}]
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 line-clamp-2 mb-1.5 leading-snug">
+              <p className="text-[11px] text-[#888888] line-clamp-2 mb-2 leading-snug">
                 {preset.description}
               </p>
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1 border-t border-slate-800/60">
-                <span>Mem: {preset.memory_size}u</span>
-                <span className="text-cyan-400">{preset.recommended_algorithm}</span>
+              <div className="flex items-center justify-between text-[10px] text-[#888888] pt-1.5 border-t border-[#2A2A26]">
+                <span>CAP: {preset.memory_size}U</span>
+                <span className={isSelected ? 'text-[#39FF6A]' : 'text-[#DCDCAA]'}>
+                  ALG: {preset.recommended_algorithm}
+                </span>
               </div>
             </button>
           );
@@ -81,3 +84,4 @@ export const MemoryPresetSelector: React.FC<MemoryPresetSelectorProps> = ({
     </div>
   );
 };
+

@@ -1,7 +1,5 @@
 import React from 'react';
 import type { CPUState, ProcessSnapshot } from '../../types/cpu';
-import { getProcessColor } from '../../utils/palette';
-import { Cpu, Zap, PauseCircle, RefreshCw } from 'lucide-react';
 
 interface CpuStatusProps {
   cpuState: CPUState | null;
@@ -16,86 +14,79 @@ export const CpuStatus: React.FC<CpuStatusProps> = ({
 }) => {
   if (!cpuState) {
     return (
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-center text-slate-500 text-xs">
-        CPU state unavailable.
+      <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 text-center text-[#888888] text-xs font-mono">
+        CORE_STATE_OFFLINE
       </div>
     );
   }
 
-  let statusTitle = 'IDLE';
-  let statusBadgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
-  let StatusIcon = PauseCircle;
+  let statusText = 'IDLE';
+  let statusColor = 'text-[#888888] border-[#888888] bg-[#888888]/10';
 
   if (cpuState.is_context_switching) {
-    statusTitle = 'CONTEXT SWITCH';
-    statusBadgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-    StatusIcon = RefreshCw;
+    statusText = 'CONTEXT_SWITCH';
+    statusColor = 'text-[#FF6B35] border-[#FF6B35] bg-[#FF6B35]/10';
   } else if (cpuState.running_pid) {
-    statusTitle = 'RUNNING';
-    statusBadgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-    StatusIcon = Zap;
+    statusText = 'RUNNING';
+    statusColor = 'text-[#39FF6A] border-[#39FF6A] bg-[#39FF6A]/10';
   }
 
-  const pidColor = cpuState.running_pid ? getProcessColor(cpuState.running_pid) : null;
-
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-lg backdrop-blur-md">
-      <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
+    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 border-b border-[#2A2A26] pb-2 text-xs">
         <div className="flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-indigo-400" />
-          <h3 className="font-semibold text-slate-100 text-sm tracking-wide uppercase">
-            CPU Core Status
+          <span className="text-[#39FF6A]">&gt;&gt;</span>
+          <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            CPU_CORE_REGISTER
           </h3>
         </div>
-        <div className="flex items-center gap-1.5 font-mono text-xs bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-slate-300">
-          <span>Tick:</span>
-          <span className="font-bold text-indigo-400">{currentTick}</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#888888] bg-[#0A0A0A] px-2 py-0.5 border border-[#2A2A26] rounded-[2px]">
+          <span>TICK:</span>
+          <span className="font-bold text-[#39FF6A]">{currentTick}</span>
         </div>
       </div>
 
+      {/* Core State & Active PID */}
       <div className="grid grid-cols-2 gap-3 mb-3">
         {/* Core State */}
-        <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800 flex flex-col justify-between">
-          <span className="text-[11px] text-slate-400 font-medium">Core State</span>
-          <div className="flex items-center gap-1.5 mt-1">
-            <StatusIcon className="w-4 h-4 text-slate-300 animate-pulse" />
-            <span
-              className={`text-xs font-semibold px-2 py-0.5 rounded border font-mono ${statusBadgeColor}`}
-            >
-              {statusTitle}
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] p-2.5 flex flex-col justify-between">
+          <span className="text-[10px] text-[#888888] uppercase tracking-wider">STATE</span>
+          <div className="mt-1">
+            <span className={`text-xs font-bold px-2 py-0.5 border rounded-[2px] inline-block ${statusColor}`}>
+              [{statusText}]
             </span>
           </div>
         </div>
 
-        {/* Running Process */}
-        <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800 flex flex-col justify-between">
-          <span className="text-[11px] text-slate-400 font-medium">Active Process</span>
+        {/* Active PID */}
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] p-2.5 flex flex-col justify-between">
+          <span className="text-[10px] text-[#888888] uppercase tracking-wider">ACTIVE PROCESS</span>
           <div className="mt-1">
-            {cpuState.running_pid && pidColor ? (
-              <span
-                className={`text-xs font-bold font-mono px-2.5 py-0.5 rounded border ${pidColor.bg} ${pidColor.border} ${pidColor.text}`}
-              >
-                {cpuState.running_pid}
+            {cpuState.running_pid ? (
+              <span className="text-xs font-bold text-[#39FF6A] border border-[#39FF6A] bg-[#39FF6A]/10 px-2 py-0.5 rounded-[2px]">
+                [{cpuState.running_pid}]
               </span>
             ) : (
-              <span className="text-xs text-slate-500 font-mono">None</span>
+              <span className="text-xs text-[#888888]">[NONE]</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Burst details if process is running */}
+      {/* Active Process Telemetry */}
       {currentProcess && (
-        <div className="bg-slate-800/40 rounded-lg p-2.5 border border-slate-800 text-xs mb-3 space-y-1.5">
-          <div className="flex justify-between text-slate-300">
-            <span>Remaining Burst:</span>
-            <span className="font-mono font-bold text-indigo-300">
-              {currentProcess.remaining_time} / {currentProcess.burst_time} ticks
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] p-2.5 text-xs mb-3 space-y-1.5">
+          <div className="flex justify-between text-[#888888] text-[11px]">
+            <span>REMAINING BURST:</span>
+            <span className="text-[#39FF6A] font-bold">
+              {currentProcess.remaining_time} / {currentProcess.burst_time}T
             </span>
           </div>
-          <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+          {/* Flat retro progress track */}
+          <div className="w-full bg-[#12130F] h-1.5 border border-[#2A2A26] rounded-[1px] overflow-hidden">
             <div
-              className="bg-indigo-500 h-full rounded-full transition-all duration-150"
+              className="bg-[#39FF6A] h-full"
               style={{
                 width: `${Math.min(
                   100,
@@ -105,39 +96,46 @@ export const CpuStatus: React.FC<CpuStatusProps> = ({
             />
           </div>
           {cpuState.current_quantum_remaining > 0 && (
-            <div className="flex justify-between text-slate-400 text-[11px]">
-              <span>Quantum Remaining:</span>
-              <span className="font-mono text-cyan-300">
-                {cpuState.current_quantum_remaining} ticks
+            <div className="flex justify-between text-[#888888] text-[11px] pt-1">
+              <span>QUANTUM REMAINING:</span>
+              <span className="text-[#DCDCAA] font-bold">
+                {cpuState.current_quantum_remaining}T
               </span>
             </div>
           )}
         </div>
       )}
 
-      {/* Context Switch Details */}
+      {/* Context Switch Indicator */}
       {cpuState.is_context_switching && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 text-xs text-amber-300 mb-3 flex items-center justify-between font-mono">
-          <span>CS Remaining:</span>
-          <span className="font-bold">{cpuState.context_switch_remaining} ticks</span>
+        <div className="bg-[#FF6B35]/10 border border-[#FF6B35] rounded-[2px] p-2 text-xs text-[#FF6B35] mb-3 flex items-center justify-between">
+          <span>CS OVERHEAD REMAINING:</span>
+          <span className="font-bold">{cpuState.context_switch_remaining}T</span>
         </div>
       )}
 
-      {/* Cumulative Counters */}
-      <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono border-t border-slate-800/80 pt-2.5 text-slate-400">
-        <div>
-          <div className="text-slate-500">Busy</div>
-          <div className="font-bold text-slate-200">{cpuState.total_busy_ticks}t</div>
+      {/* Cumulative Counters in large monospace numerals */}
+      <div className="grid grid-cols-3 gap-2 border-t border-[#2A2A26] pt-2.5 text-center">
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] py-1.5">
+          <div className="text-[10px] text-[#888888]">BUSY</div>
+          <div className="text-sm font-bold text-[#39FF6A] mt-0.5">
+            {cpuState.total_busy_ticks}t
+          </div>
         </div>
-        <div>
-          <div className="text-slate-500">Idle</div>
-          <div className="font-bold text-slate-200">{cpuState.total_idle_ticks}t</div>
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] py-1.5">
+          <div className="text-[10px] text-[#888888]">IDLE</div>
+          <div className="text-sm font-bold text-[#E8F5E9] mt-0.5">
+            {cpuState.total_idle_ticks}t
+          </div>
         </div>
-        <div>
-          <div className="text-slate-500">CS</div>
-          <div className="font-bold text-slate-200">{cpuState.total_context_switch_ticks}t</div>
+        <div className="bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] py-1.5">
+          <div className="text-[10px] text-[#888888]">OVERHEAD</div>
+          <div className="text-sm font-bold text-[#FF6B35] mt-0.5">
+            {cpuState.total_context_switch_ticks}t
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
