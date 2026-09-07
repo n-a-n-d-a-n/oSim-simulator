@@ -45,7 +45,7 @@ The simulator allows students, educators, and systems engineers to inspect step-
 
 - ⬜ **Phase 3 - Contiguous Memory Allocation** (Fixed & variable partitioning, First-Fit, Best-Fit, Worst-Fit, external fragmentation & compaction)
 - ⬜ **Phase 4 - Virtual Memory + Page Replacement** (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
-- ⬜ **Phase 5 — Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
+- ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
 - ⬜ **Phase 6 — Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
 - ⬜ **Phase 7 — Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
 
