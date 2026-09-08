@@ -44,3 +44,12 @@ export interface LiveStatus {
   psutil_version: string | null;
   message: string;
 }
+
+export type AutoRefreshMode = 'PAUSED' | '1s' | '2s' | '5s';
+
+export interface TelemetryHistoryPoint {
+  timestamp: number;
+  cpu_percent: number;
+  memory_percent: number;
+}
+
