@@ -21,13 +21,15 @@ import { EventLog } from './components/cpu/EventLog';
 import { TimelineControls } from './components/cpu/TimelineControls';
 
 import { MemoryDashboard } from './components/memory/MemoryDashboard';
-import { AlertCircle, Cpu, Layers } from 'lucide-react';
+import { LiveDashboard } from './components/live/LiveDashboard';
+import { AlertCircle, Cpu, Layers, Activity } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation Module Tab
-  const [activeTab, setActiveTab] = useState<'cpu' | 'memory'>(() => {
+  const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'live'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'live') return 'live';
       if (params.get('tab') === 'memory' || params.has('memory_tick')) return 'memory';
       if (window.location.hash.includes('memory')) return 'memory';
     }
@@ -153,6 +155,18 @@ export const App: React.FC = () => {
             <Layers className={`w-3.5 h-3.5 ${activeTab === 'memory' ? 'text-[#DCDCAA]' : 'text-[#83887E]'}`} />
             <span>CONTIGUOUS MEMORY ALLOCATION (PHASE 3)</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('live')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[3px] text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'live'
+                ? 'bg-[#181C14] text-[#4EC9B0] border border-[#4EC9B0]/70 shadow-[0_0_12px_rgba(78,201,176,0.18)]'
+                : 'text-[#83887E] hover:text-[#E8F5E9] border border-transparent hover:bg-[#151712]'
+            }`}
+          >
+            <Activity className={`w-3.5 h-3.5 ${activeTab === 'live' ? 'text-[#4EC9B0]' : 'text-[#83887E]'}`} />
+            <span>LIVE SYSTEM (FOUNDATION)</span>
+          </button>
         </div>
 
         {/* ACTIVE TAB: CPU SIMULATOR */}
@@ -265,6 +279,13 @@ export const App: React.FC = () => {
         {activeTab === 'memory' && (
           <div className="space-y-6">
             <MemoryDashboard />
+          </div>
+        )}
+
+        {/* ACTIVE TAB: LIVE SYSTEM OBSERVATION (FOUNDATION) */}
+        {activeTab === 'live' && (
+          <div className="space-y-6">
+            <LiveDashboard />
           </div>
         )}
       </div>
