@@ -4,3 +4,5 @@ pydantic>=2.7.0
 httpx>=0.27.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
+# Live host observation dependency (used exclusively in backend/live_agent; strictly forbidden in backend/sim_engine)
+psutil>=5.9.0

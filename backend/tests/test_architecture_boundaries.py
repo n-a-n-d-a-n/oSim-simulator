@@ -33,3 +33,45 @@ def test_sim_engine_has_no_web_dependencies():
                             assert root_pkg not in forbidden_modules, (
                                 f"Architectural boundary violation in {file}: forbidden import from '{node.module}'"
                             )
+
+
+def test_sim_engine_has_no_live_agent_or_system_observation_dependencies():
+    """Ensure no module in sim_engine imports live_agent, psutil, or host monitoring libraries."""
+    sim_engine_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "sim_engine")
+    )
+
+    forbidden_modules = {
+        "psutil",
+        "live_agent",
+        "backend.live_agent",
+        "httpx",
+        "requests",
+        "urllib.request",
+        "socket",
+        "asyncio",
+    }
+
+    for root, _, files in os.walk(sim_engine_dir):
+        for file in files:
+            if file.endswith(".py"):
+                filepath = os.path.join(root, file)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    tree = ast.parse(f.read(), filename=filepath)
+
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            full_name = alias.name
+                            root_pkg = full_name.split(".")[0]
+                            assert full_name not in forbidden_modules and root_pkg not in forbidden_modules, (
+                                f"Boundary violation in {file}: sim_engine must not import '{alias.name}'"
+                            )
+                    elif isinstance(node, ast.ImportFrom):
+                        if node.module:
+                            full_name = node.module
+                            root_pkg = full_name.split(".")[0]
+                            assert full_name not in forbidden_modules and root_pkg not in forbidden_modules, (
+                                f"Boundary violation in {file}: sim_engine must not import from '{node.module}'"
+                            )
+
