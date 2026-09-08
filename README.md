@@ -11,22 +11,23 @@ proportional address-accurate memory maps, process state tracking, and determini
 timeline playback.
 
 The simulator allows students, educators, and systems engineers to inspect
-step-by-step CPU scheduling and contiguous memory allocation, simulate context
+step-by-step CPU scheduling and contiguous memory allocation, observe real-world
+host operating system processes and hardware telemetry in real time, simulate context
 switches, examine ready queues and free holes, and analyze performance metrics
 under textbook workloads and custom edge cases.
 
 ## UI Preview
 
-| CPU Scheduling — Oscilloscope View | Memory Allocation — Address Map |
-|---|---|
-| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) |
+| CPU Scheduling — Oscilloscope View | Memory Allocation — Address Map | Live System Observation — Real-Time Monitor |
+|---|---|---|
+| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
 
 The interface renders simulation state as a live instrument panel: a stepped
 oscilloscope trace for CPU execution, `[BRACKETED]` terminal-style state tags for
-process transitions, a scrolling TTY event stream, and punch-card style process
-input strips — all built on a strict six-color token system (phosphor green,
-amber, rust, warning orange, punch-hole crimson, muted gray) against a near-black
-instrument chassis.
+process transitions, a scrolling TTY event stream, real-time discrete 60s telemetry sparklines,
+a multi-core execution matrix, and punch-card style process input strips — all built on a strict
+six-color token system (phosphor green, amber, rust, warning orange, punch-hole crimson, muted gray)
+against a near-black instrument chassis.
 
 ---
 
@@ -115,28 +116,36 @@ instrument chassis.
 
 ## Architecture
 
-OSim follows a strict three-tier layered architecture enforcing clean separation of concerns:
+OSim enforces a decoupled architecture with strict separation of concerns between theoretical simulation and real-world system observation:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     React Frontend                      │
-│        (Vite, TypeScript, Component Dashboard)          │
-└───────────────────────────┬─────────────────────────────┘
-                            │ HTTP / JSON
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│                    FastAPI REST API                     │
-│      (Pydantic Schemas, API Endpoints, Validation)      │
-└───────────────────────────┬─────────────────────────────┘
-                            │ Direct Python Invocation
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│               Pure Python Simulation Engine             │
-│    (Discrete Engine, Core Schedulers, Memory Subsystem) │
-└─────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                             React Frontend                             │
+│       (Vite, TypeScript, Retro Systems Console Dashboard)              │
+│       • CPU Scheduling (Phase 1 & 2)                                   │
+│       • Contiguous Memory Allocation (Phase 3)                         │
+│       • Live System Observation (LIVE-1 Foundation & LIVE-2 Monitor)   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ HTTP / JSON
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                            FastAPI REST API                            │
+│                 (Pydantic Schemas, Endpoints, Validation)              │
+└──────────────────┬─────────────────────────────────┬───────────────────┘
+                   │ Direct Python Invocation        │ Direct Python Invocation
+                   ▼                                 ▼
+┌─────────────────────────────────────┐ ┌────────────────────────────────┐
+│    Pure Python Simulation Engine    │ │     Live System Observation    │
+│       (backend/sim_engine/)         │ │      (backend/live_agent/)     │
+│                                     │ │                                │
+│ • Standard library only             │ │ • Non-invasive read-only       │
+│ • Deterministic discrete ticks      │ │ • psutil host inspection       │
+│ • CPU schedulers & memory models    │ │ • Real CPU, RAM, & processes   │
+│ • ZERO OS/live/network dependencies │ │ • Zero command/kill privileges │
+└─────────────────────────────────────┘ └────────────────────────────────┘
 ```
 
-> **Architectural Boundary Principle**: The core simulation engine (`backend/sim_engine/`) is implemented in pure Python (standard library only) and remains completely decoupled and independent from FastAPI, HTTP protocols, and any UI/web framework. It can be executed in standalone CLI scripts, automated test runners, or imported as a library.
+> **Architectural Boundary Principle**: The core simulation engine (`backend/sim_engine/`) is implemented in pure Python (standard library only) and remains completely decoupled and independent from FastAPI, HTTP protocols, `psutil`, and any UI/web framework. An automated AST test (`backend/tests/test_architecture_boundaries.py`) enforces that `sim_engine` contains **zero imports** of `live_agent`, `psutil`, `fastapi`, `starlette`, or OS observation APIs.
 
 ---
 
@@ -182,6 +191,18 @@ uvicorn backend.app.main:app --reload --port 8000
 - Interactive OpenAPI Docs: `http://localhost:8000/docs`
 - Health Check: `http://localhost:8000/api/health`
 
+#### REST API Reference
+| Endpoint | Method | Subsystem | Description |
+| :--- | :--- | :--- | :--- |
+| `/api/health` | `GET` | Core | Backend health status |
+| `/api/v1/cpu/simulate` | `POST` | CPU Simulation | Run deterministic CPU scheduling simulation |
+| `/api/v1/cpu/presets` | `GET` | CPU Simulation | Retrieve canonical Silberschatz Chapter 5 benchmark workloads |
+| `/api/v1/memory/simulate` | `POST` | Memory Simulation | Run discrete-time contiguous memory allocation simulation |
+| `/api/v1/memory/workloads` | `GET` | Memory Simulation | Retrieve catalog of educational contiguous memory presets |
+| `/api/v1/memory/workloads/{preset_id}` | `GET` | Memory Simulation | Retrieve a specific memory workload preset |
+| `/api/v1/live/status` | `GET` | Live Observation | Check host observation collector availability and platform |
+| `/api/v1/live/snapshot` | `GET` | Live Observation | Capture point-in-time real host CPU, memory, and process telemetry |
+
 ### 3. Run the Frontend Application
 In a separate terminal, navigate to the `frontend` directory:
 ```bash
@@ -189,16 +210,23 @@ cd frontend
 npm install
 npm run dev
 ```
-Open your browser at the displayed local URL (typically `http://localhost:5173`). Switch seamlessly between CPU Scheduling and Contiguous Memory Allocation using the top navigation tab bar.
+Open your browser at the displayed local URL (typically `http://localhost:5173`). Switch seamlessly between:
+- **CPU SCHEDULING (PHASE 1 & 2)**: Oscilloscope Gantt trace, state cards, ready queue, Silberschatz presets, timeline scrubber.
+- **CONTIGUOUS MEMORY ALLOCATION (PHASE 3)**: Address-accurate proportional memory map, dynamic free/allocated holes, Next Fit cursor, external fragmentation diagnostics.
+- **LIVE SYSTEM (FOUNDATION & REAL-TIME)**: Non-invasive host observation, real-time auto-refresh polling (1s / 2s / 5s / Paused), 60s discrete telemetry sparklines, per-core matrix, and sortable/searchable process table.
 
 ### 4. Run Automated Tests
-Execute the full test suite (78 tests) from the repository root:
+Execute the full test suite (**94 tests**) from the repository root:
 ```bash
 pytest
 ```
 To run tests with verbose output:
 ```bash
 pytest -v
+```
+To verify that the simulation engine remains strictly decoupled from host/OS/web libraries (AST boundary test):
+```bash
+pytest backend/tests/test_architecture_boundaries.py -v
 ```
 
 ### 5. Run the CLI Demonstration
