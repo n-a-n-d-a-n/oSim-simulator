@@ -86,3 +86,14 @@ def test_api_live_snapshot_unexpected_error_handling():
         assert response.status_code == 500
         data = response.json()
         assert "Unexpected error while observing host system" in data["detail"]
+
+
+def test_api_live_repeated_polling():
+    """Test rapid sequential polling requests (simulating 1s/2s frontend polling)."""
+    for _ in range(3):
+        response = client.get("/api/v1/live/snapshot")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["process_count"] > 0
+        assert data["cpu"]["logical_cpu_count"] >= 1
+
