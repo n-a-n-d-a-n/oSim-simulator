@@ -149,35 +149,52 @@ The Live System subsystem operates under a non-negotiable **read-only safety con
 
 ---
 
-## 7. Current Foundation Scope (LIVE-1)
+## 7. Real-Time Continuous Monitoring (LIVE-2)
 
-The LIVE-1 foundation focuses exclusively on:
-- Explicit, user-triggered one-shot snapshot capture (`POST` or `GET /api/v1/live/snapshot`).
-- Subsystem health and platform reporting (`GET /api/v1/live/status`).
-- Clean console visualization of system status, CPU/Memory gauges, and process tables.
+OSim LIVE-2 introduces continuous, real-time host observability inspired by desktop systems consoles (Windows Task Manager, Linux `htop`).
 
-### Explicitly Excluded from LIVE-1:
-- ❌ No background polling threads or scheduled daemon tasks.
-- ❌ No WebSockets or server-sent events.
-- ❌ No automatic browser refresh intervals.
-- ❌ No persistent SQLite/time-series database storage.
-- ❌ No event detection or anomaly alerts.
-- ❌ No automatic live-to-simulation workload synthesis.
+### Polling Architecture & Cadence Control
+Rather than introducing background Python server threads or persistent stateful WebSocket/SSE channels, LIVE-2 employs **Frontend-Driven Auto-Refresh Polling** against the standard `GET /api/v1/live/snapshot` REST endpoint:
+- **Modes**: `PAUSED` (default upon initial load), `1s` (~1000ms), `2s` (~2000ms), `5s` (~5000ms).
+- **Initial Load**: Captures an initial baseline snapshot upon mounting, then remains in `PAUSED` mode until the user explicitly selects an interval.
+- **Overlap Protection**: An in-flight request ref (`isRequestInFlightRef`) ensures that if an OS sample takes longer than the interval, subsequent ticks are skipped safely rather than queueing stacked concurrent requests.
+- **Clean Unmount**: React `useEffect` cleanups explicitly invoke `clearInterval()` when navigating away from the Live tab, guaranteeing zero background CPU consumption.
+
+### Discrete Rolling History Buffer (60 Seconds)
+- Stored exclusively in transient frontend component state (`rollingHistory`).
+- **Bounded Window**: Retains discrete real observations where $\text{timestamp} \ge \text{current\_timestamp} - 60.0\text{s}$ (capped at 65 entries).
+- **Oscilloscope Sparklines**: Discrete SVG step lines render directly from discrete snapshots with the newest observation on the right edge. No continuous animation or interpolated synthetic values are fabricated between samples.
+- **Transient Only**: Discarded upon tab refresh; never persisted to disk or SQLite in LIVE-2.
+
+### Task Manager / htop-Style Process Table
+- Real-time search filter matching process executable names or PIDs.
+- Dynamic column sorting across PID, Name, CPU %, Memory (RSS), and Thread count.
+- Enriched process telemetry display including Parent PID (`PPID`) and accumulated user/system CPU execution time (`CPU TIME`).
+- Virtualized top-50 row rendering to preserve smooth 60 FPS performance without browser DOM thrashing.
+
+---
+
+## 8. Current Limitations & Scope Exclusions
+
+LIVE-2 is strictly bounded:
+- ❌ No WebSockets or Server-Sent Events (SSE).
+- ❌ No background daemon threads or schedulers in Python backend.
+- ❌ No process control: no kill, suspend, resume, priority, or CPU affinity modification.
+- ❌ No historical database or disk persistence.
+- ❌ No event detection or automated anomaly alerting.
+- ❌ No Live → Simulation workload synthesis.
 - ❌ No Phase 4 Virtual Memory / Page Replacement implementation.
 
 ---
 
-## 8. Future Roadmap
+## 9. Future Roadmap
 
-With the LIVE-1 foundation established, future phases will introduce:
+With LIVE-1 and LIVE-2 established, subsequent phases will introduce:
 
-1. **Phase LIVE-2: Historical Observation Buffer**
-   - In-memory ring buffer capturing recent snapshots on demand.
-   - Sliding-window CPU and memory utilization sparklines.
-2. **Phase LIVE-3: Event Detection & Heuristics**
+1. **Phase LIVE-3: Event Detection & Heuristics**
    - Detection of notable OS events: CPU saturation spikes, process spawn bursts, memory pressure.
-3. **Phase LIVE-4: Educational Workload Synthesis**
+2. **Phase LIVE-4: Educational Workload Synthesis**
    - Analyzing real process execution histories to derive synthetic arrival times and estimated burst durations.
    - Producing validated `CPUSimulateRequest` payloads from real host activity.
-4. **Phase LIVE-5: Comparative Simulation Mode**
+3. **Phase LIVE-5: Comparative Simulation Mode**
    - Replaying live-derived workloads across OSim schedulers (FCFS, Round Robin, SRTF, Priority) to study how different scheduling policies would have managed the observed host workload.

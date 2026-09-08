@@ -84,19 +84,20 @@ instrument chassis.
   - Reversible timeline playback (Play / Pause / Step Forward / Step Back / Reset / Speed / Scrubber).
   - Chronological memory event stream with type filters.
 
-### 🔬 Live System Observation (Foundation)
+### 🔬 Live System Observation (LIVE-1 Foundation & LIVE-2 Real-Time Monitor)
 - **Non-Invasive Read-Only Instrumentation**: Host system telemetry collection strictly bounded to read-only operations via Python `psutil`.
 - **Pure Architectural Decoupling**: Complete AST-verified isolation between `backend/live_agent/` and `backend/sim_engine/` — `sim_engine` contains zero OS/live/psutil dependencies.
 - **Immutable Domain Telemetry**: Frozen dataclasses (`ProcessObservation`, `CPUObservation`, `MemoryObservation`, `SystemSnapshot`) with strict non-negative bounds and deterministic PID ordering.
 - **Robust Collector Abstraction**: Abstract collector contracts (`CPUCollector`, `MemoryCollector`, `ProcessCollector`) with ephemeral process skip semantics, honest CPU sampling intervals (no zero fabrication), and non-blocking failure surfacing.
 - **FastAPI Endpoints**:
   - `GET /api/v1/live/status`: Subsystem health, availability, and host platform reporting.
-  - `GET /api/v1/live/snapshot`: Explicit user-triggered point-in-time system snapshot (no background polling or automatic loops).
-- **Retro Systems Console Live View**:
-  - Point-in-time system summary banner with read-only badge and host status indicator.
-  - Hardware telemetry gauges (CPU utilization, core count, RAM & Swap utilization breakdown).
-  - Searchable, sortable process table with process state tags, CPU/Memory percentages, thread counts, and memory footprint.
-  - On-demand "CAPTURE SNAPSHOT" trigger.
+  - `GET /api/v1/live/snapshot`: Explicit user-triggered point-in-time system snapshot (supports frontend polling cadence).
+- **Retro Systems Console Live View (LIVE-2)**:
+  - **Auto-Refresh Polling Switch**: `[ AUTO-REFRESH: PAUSED | 1s | 2s | 5s ]` with overlap protection (`inFlightRef`) and unmount timer cleanup.
+  - **Discrete Rolling Sparklines**: 60-second in-memory observational buffers for CPU and RAM utilization traces (pure SVG oscilloscope style, newest samples at right, discrete genuine points).
+  - **Multi-Core Load Matrix**: Grid displaying per-core utilization percentages across all logical CPU execution cores.
+  - **Task Manager / htop-Style Process Table**: Dynamic text search (by Name or PID), multi-column sorting (by CPU %, RSS Memory, PID, Threads, Name), PPID inspection, and formatted CPU execution time (`CPU TIME`).
+  - **Freshness & Stale Indicators**: Explicit timestamping with warning indicator on connection interruptions.
 - **Architecture Documentation**: Detailed specification in [`docs/live-system-architecture.md`](docs/live-system-architecture.md).
 
 ---
