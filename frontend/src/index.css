@@ -1,27 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page: #0A0A0A;
-  --surface-panel: #12130F;
-  --border-panel: #2A2A26;
+  --font-system: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
+  --bg-page: #080907;
+  --surface-panel: #11130E;
+  --surface-panel-elevated: #161912;
+  --border-panel: #262922;
+  --border-panel-bright: #383D33;
   --text-primary: #E8F5E9;
-  --text-muted: #888888;
+  --text-muted: #83887E;
   --accent-running: #39FF6A;
   --accent-ready: #DCDCAA;
   --accent-terminated: #CE9178;
   --accent-warning: #FF6B35;
   --accent-punch: #B8433A;
+  --accent-cyan: #4EC9B0;
 }
 
 @layer base {
   * {
-    border-color: #2A2A26;
+    border-color: #262922;
   }
 
   body {
-    background-color: #0A0A0A;
+    background-color: #080907;
+    background-image: 
+      radial-gradient(ellipse at 50% 0%, rgba(57, 255, 106, 0.035) 0%, transparent 70%),
+      linear-gradient(to right, rgba(38, 41, 34, 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(38, 41, 34, 0.2) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
     color: #E8F5E9;
-    font-family: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
+    font-family: var(--font-system) !important;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -29,45 +38,69 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  button, input, select, textarea {
-    font-family: inherit;
+  button, input, select, textarea, .font-mono, [class*="font-mono"] {
+    font-family: var(--font-system) !important;
   }
 }
 
 /* Custom retro systems scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
-  border-left: 1px solid #2A2A26;
+  background: #080907;
+  border-left: 1px solid #262922;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A26;
-  border-radius: 0px;
+  background: #262922;
+  border-radius: 1px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #39FF6A;
+  box-shadow: 0 0 8px rgba(57, 255, 106, 0.4);
 }
 
 /* Retro Systems Console utility classes */
 .retro-panel {
-  background-color: #12130F;
-  border: 1px solid #2A2A26;
+  background: linear-gradient(180deg, #131610 0%, #0E100C 100%);
+  border: 1px solid #262922;
   border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .retro-subpanel {
-  background-color: #0A0A0A;
-  border: 1px solid #2A2A26;
+  background-color: #0A0C08;
+  border: 1px solid #262922;
   border-radius: 2px;
 }
 
 .oscilloscope-grid {
   background-image: 
-    linear-gradient(to right, rgba(42, 42, 38, 0.45) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(42, 42, 38, 0.45) 1px, transparent 1px);
+    linear-gradient(to right, rgba(42, 48, 38, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 48, 38, 0.5) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* Phosphor Glow Effects */
+.glow-text-green {
+  text-shadow: 0 0 10px rgba(57, 255, 106, 0.6), 0 0 20px rgba(57, 255, 106, 0.3);
+}
+
+.glow-text-amber {
+  text-shadow: 0 0 10px rgba(220, 220, 170, 0.6), 0 0 20px rgba(220, 220, 170, 0.3);
+}
+
+.glow-box-green {
+  box-shadow: 0 0 15px rgba(57, 255, 106, 0.15), inset 0 0 10px rgba(57, 255, 106, 0.05);
+}
+
+.glow-box-amber {
+  box-shadow: 0 0 15px rgba(220, 220, 170, 0.15), inset 0 0 10px rgba(220, 220, 170, 0.05);
+}
+
+.oscilloscope-trace {
+  filter: drop-shadow(0 0 4px rgba(57, 255, 106, 0.8));
+}
+
 

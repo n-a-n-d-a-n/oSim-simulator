@@ -37,31 +37,31 @@ export const CpuControls: React.FC<CpuControlsProps> = ({
   isLoading,
 }) => {
   return (
-    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 font-mono flex flex-col justify-between h-full">
+    <div className="retro-panel p-4 font-mono flex flex-col justify-between h-full shadow-lg">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between mb-3 border-b border-[#2A2A26] pb-2 text-xs">
+        <div className="flex items-center justify-between mb-3 border-b border-[#262922] pb-2 text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[#39FF6A]">&gt;&gt;</span>
-            <h3 className="font-semibold text-[#E8F5E9] tracking-wider uppercase">
+            <span className="text-[#39FF6A] font-bold">&gt;&gt;</span>
+            <h3 className="font-bold text-[#E8F5E9] tracking-wider uppercase">
               SCHEDULER_CONTROL_BANK
             </h3>
           </div>
-          <span className="text-[10px] text-[#888888]">[UNIT: 01]</span>
+          <span className="text-[10px] text-[#83887E] bg-[#0A0C08] px-1.5 py-0.5 rounded-[2px] border border-[#262922]">[UNIT: 01]</span>
         </div>
 
         {/* Algorithm Select */}
         <div className="mb-3">
-          <label className="block text-[11px] text-[#888888] mb-1.5 uppercase">
+          <label className="block text-[11px] text-[#83887E] mb-1.5 uppercase font-semibold">
             DISPATCH ALGORITHM
           </label>
           <select
             value={algorithm}
             onChange={(e) => onChangeAlgorithm(e.target.value as AlgorithmType)}
-            className="w-full bg-[#0A0A0A] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-2.5 py-1.5 text-xs text-[#E8F5E9] outline-none transition-colors"
+            className="w-full bg-[#0A0C08] border border-[#262922] focus:border-[#39FF6A] rounded-[3px] px-2.5 py-1.5 text-xs text-[#E8F5E9] outline-none transition-colors cursor-pointer"
           >
             {ALGORITHMS.map((alg) => (
-              <option key={alg.value} value={alg.value} className="bg-[#0A0A0A] text-[#E8F5E9]">
+              <option key={alg.value} value={alg.value} className="bg-[#0A0C08] text-[#E8F5E9]">
                 {alg.label} — [{alg.tag}]
               </option>
             ))}
@@ -69,15 +69,15 @@ export const CpuControls: React.FC<CpuControlsProps> = ({
         </div>
 
         {/* Algorithm-Specific Parameters */}
-        <div className="space-y-3 bg-[#0A0A0A] border border-[#2A2A26] rounded-[2px] p-3 mb-3">
-          <div className="text-[10px] text-[#888888] uppercase border-b border-[#2A2A26] pb-1">
+        <div className="space-y-3 bg-[#0A0C08] border border-[#262922] rounded-[3px] p-3 mb-3">
+          <div className="text-[10px] text-[#83887E] uppercase border-b border-[#262922] pb-1 font-bold">
             RUNTIME PARAMETERS // {algorithm}
           </div>
 
           {algorithm === 'ROUND_ROBIN' && (
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1">
-                TIME QUANTUM (<span className="text-[#39FF6A]">Q TICKS</span>)
+              <label className="block text-[11px] text-[#83887E] mb-1">
+                TIME QUANTUM (<span className="text-[#39FF6A] font-bold">Q TICKS</span>)
               </label>
               <input
                 type="number"
@@ -85,29 +85,29 @@ export const CpuControls: React.FC<CpuControlsProps> = ({
                 max={50}
                 value={timeQuantum}
                 onChange={(e) => onChangeTimeQuantum(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none"
+                className="w-full bg-[#11130E] border border-[#262922] focus:border-[#39FF6A] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none"
               />
             </div>
           )}
 
           {algorithm.startsWith('PRIORITY') && (
             <div>
-              <label className="block text-[11px] text-[#888888] mb-1">PRIORITY CONVENTION</label>
+              <label className="block text-[11px] text-[#83887E] mb-1 font-semibold">PRIORITY CONVENTION</label>
               <select
                 value={lowerNumberHigherPriority ? 'lower' : 'higher'}
                 onChange={(e) => onChangePriorityMode(e.target.value === 'lower')}
-                className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#39FF6A] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none"
+                className="w-full bg-[#11130E] border border-[#262922] focus:border-[#39FF6A] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none cursor-pointer"
               >
-                <option value="lower" className="bg-[#0A0A0A]">Lower number = Higher priority (1 is highest)</option>
-                <option value="higher" className="bg-[#0A0A0A]">Higher number = Higher priority (10 is highest)</option>
+                <option value="lower" className="bg-[#0A0C08]">Lower number = Higher priority (1 is highest)</option>
+                <option value="higher" className="bg-[#0A0C08]">Higher number = Higher priority (10 is highest)</option>
               </select>
             </div>
           )}
 
           {/* Context Switch Cost */}
           <div>
-            <label className="block text-[11px] text-[#888888] mb-1">
-              CONTEXT-SWITCH OVERHEAD (<span className="text-[#FF6B35]">TICKS</span>)
+            <label className="block text-[11px] text-[#83887E] mb-1 font-semibold">
+              CONTEXT-SWITCH OVERHEAD (<span className="text-[#FF6B35] font-bold">TICKS</span>)
             </label>
             <input
               type="number"
@@ -115,9 +115,9 @@ export const CpuControls: React.FC<CpuControlsProps> = ({
               max={10}
               value={contextSwitchCost}
               onChange={(e) => onChangeContextSwitchCost(Math.max(0, parseInt(e.target.value, 10) || 0))}
-              className="w-full bg-[#12130F] border border-[#2A2A26] focus:border-[#FF6B35] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none"
+              className="w-full bg-[#11130E] border border-[#262922] focus:border-[#FF6B35] rounded-[2px] px-2 py-1 text-xs text-[#E8F5E9] outline-none"
             />
-            <span className="text-[10px] text-[#888888] mt-1 block">
+            <span className="text-[10px] text-[#83887E] mt-1 block">
               Incurred whenever switching between distinct processes.
             </span>
           </div>
@@ -125,11 +125,11 @@ export const CpuControls: React.FC<CpuControlsProps> = ({
       </div>
 
       {/* Engage Simulation Button */}
-      <div className="pt-2 border-t border-[#2A2A26]">
+      <div className="pt-2 border-t border-[#262922]">
         <button
           onClick={onRunSimulation}
           disabled={isLoading}
-          className="w-full bg-[#12130F] hover:bg-[#161813] active:bg-[#0A0A0A] disabled:opacity-40 text-[#39FF6A] border border-[#39FF6A] py-2 px-3 rounded-[2px] flex items-center justify-center gap-2 cursor-pointer transition-colors text-xs font-bold tracking-wider uppercase"
+          className="w-full bg-[#122214] hover:bg-[#182F1C] active:scale-[0.99] text-[#39FF6A] border border-[#39FF6A] shadow-[0_0_14px_rgba(57,255,106,0.25)] hover:shadow-[0_0_22px_rgba(57,255,106,0.45)] py-2.5 px-3 rounded-[3px] flex items-center justify-center gap-2 cursor-pointer transition-all text-xs font-bold tracking-wider uppercase disabled:opacity-40"
         >
           {isLoading ? (
             <>

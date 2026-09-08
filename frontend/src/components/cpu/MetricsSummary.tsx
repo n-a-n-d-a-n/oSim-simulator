@@ -52,16 +52,16 @@ export const MetricsSummary: React.FC<MetricsSummaryProps> = ({ metrics }) => {
       {items.map((item, idx) => (
         <div
           key={idx}
-          className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-3 flex flex-col justify-between"
+          className="retro-panel p-3 flex flex-col justify-between hover:border-[#383D33] transition-all hover:translate-y-[-1px]"
         >
-          <span className="text-[10px] text-[#888888] uppercase tracking-wider">
+          <span className="text-[10px] text-[#83887E] uppercase tracking-wider font-semibold">
             {item.label}
           </span>
           <div className="my-1.5">
-            <div className={`text-xl font-bold ${item.color}`}>
+            <div className={`text-xl font-bold tracking-tight ${item.color}`}>
               {item.value}
             </div>
-            <div className="text-[10px] text-[#888888] truncate mt-0.5">
+            <div className="text-[10px] text-[#83887E] truncate mt-0.5">
               {item.sub}
             </div>
           </div>

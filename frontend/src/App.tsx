@@ -21,8 +21,7 @@ import { EventLog } from './components/cpu/EventLog';
 import { TimelineControls } from './components/cpu/TimelineControls';
 
 import { MemoryDashboard } from './components/memory/MemoryDashboard';
-
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Cpu, Layers } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation Module Tab
@@ -97,59 +96,61 @@ export const App: React.FC = () => {
       : null;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#E8F5E9] flex flex-col font-mono selection:bg-[#39FF6A]/20 selection:text-[#39FF6A]">
+    <div className="min-h-screen bg-[#080907] text-[#E8F5E9] flex flex-col font-mono selection:bg-[#39FF6A]/20 selection:text-[#39FF6A]">
       <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4 flex-1">
-        {/* Console Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2A26] pb-4">
+        {/* Modern Console Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#262922] pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#12130F] border border-[#39FF6A] rounded-[2px] flex items-center justify-center text-[#39FF6A]">
-              <span className="font-bold text-sm">Ω</span>
+            <div className="w-9 h-9 bg-gradient-to-b from-[#181C14] to-[#0E100C] border border-[#39FF6A]/60 rounded-[3px] flex items-center justify-center text-[#39FF6A] shadow-[0_0_12px_rgba(57,255,106,0.2)]">
+              <span className="font-bold text-base">Ω</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold tracking-wider text-[#E8F5E9] uppercase">
+                <h1 className="text-base sm:text-lg font-bold tracking-widest text-[#E8F5E9] uppercase glow-text-green">
                   OSIM // SYSTEMS CONSOLE
                 </h1>
-                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#12130F] border border-[#2A2A26] text-[#DCDCAA]">
-                  REV 3.1
+                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-[2px] bg-[#161912] border border-[#383D33] text-[#DCDCAA] font-bold">
+                  REV 3.2
                 </span>
               </div>
-              <p className="text-[11px] text-[#888888]">
-                DETERMINISTIC CPU SCHEDULING &bull; REAL-TIME OSCILLOSCOPE LOG
+              <p className="text-[11px] text-[#83887E] tracking-tight">
+                DETERMINISTIC CPU SCHEDULER &bull; REAL-TIME OSCILLOSCOPE TRACE &bull; MEMORY SUBSYSTEM
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-[#888888]">
-            <div className="flex items-center gap-1.5 bg-[#12130F] border border-[#2A2A26] px-2 py-1 rounded-[2px]">
-              <span className="w-2 h-2 rounded-full bg-[#39FF6A] animate-pulse" />
-              <span className="text-[#39FF6A] font-bold">CORE ONLINE</span>
+
+          <div className="flex items-center gap-2.5 text-xs">
+            {/* Core Status */}
+            <div className="flex items-center gap-1.5 bg-[#12140E] border border-[#262922] px-2.5 py-1 rounded-[3px]">
+              <span className="w-2 h-2 rounded-full bg-[#39FF6A] animate-pulse shadow-[0_0_8px_#39FF6A]" />
+              <span className="text-[#39FF6A] font-bold tracking-wider">CORE ONLINE</span>
             </div>
           </div>
         </header>
 
-        {/* Instrument Switch Tabs */}
-        <div className="flex items-center gap-2 p-1 bg-[#12130F] border border-[#2A2A26] rounded-[2px] w-fit">
+        {/* Upgraded Instrument Switch Tabs */}
+        <div className="flex flex-wrap items-center gap-2 p-1 bg-[#11130E] border border-[#262922] rounded-[4px] w-fit shadow-md">
           <button
             onClick={() => setActiveTab('cpu')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[3px] text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'cpu'
-                ? 'bg-[#0A0A0A] text-[#39FF6A] border border-[#39FF6A]'
-                : 'text-[#888888] hover:text-[#E8F5E9] border border-transparent'
+                ? 'bg-[#181C14] text-[#39FF6A] border border-[#39FF6A]/70 shadow-[0_0_12px_rgba(57,255,106,0.18)]'
+                : 'text-[#83887E] hover:text-[#E8F5E9] border border-transparent hover:bg-[#151712]'
             }`}
           >
-            <span>[•]</span>
+            <Cpu className={`w-3.5 h-3.5 ${activeTab === 'cpu' ? 'text-[#39FF6A]' : 'text-[#83887E]'}`} />
             <span>CPU SCHEDULING (PHASE 1 &amp; 2)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('memory')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-xs font-bold transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[3px] text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'memory'
-                ? 'bg-[#0A0A0A] text-[#DCDCAA] border border-[#DCDCAA]'
-                : 'text-[#888888] hover:text-[#E8F5E9] border border-transparent'
+                ? 'bg-[#181C14] text-[#DCDCAA] border border-[#DCDCAA]/70 shadow-[0_0_12px_rgba(220,220,170,0.18)]'
+                : 'text-[#83887E] hover:text-[#E8F5E9] border border-transparent hover:bg-[#151712]'
             }`}
           >
-            <span>[ ]</span>
+            <Layers className={`w-3.5 h-3.5 ${activeTab === 'memory' ? 'text-[#DCDCAA]' : 'text-[#83887E]'}`} />
             <span>CONTIGUOUS MEMORY ALLOCATION (PHASE 3)</span>
           </button>
         </div>
@@ -269,8 +270,8 @@ export const App: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-[#2A2A26] bg-[#0A0A0A] py-3 text-center text-xs text-[#888888] font-mono">
-        OSIM // EDUCATIONAL OPERATING SYSTEM RESOURCE SIMULATOR &bull; RETRO SYSTEMS CONSOLE REV 3.1
+      <footer className="border-t border-[#262922] bg-[#0A0C08] py-3 text-center text-xs text-[#83887E]">
+        OSIM // EDUCATIONAL OPERATING SYSTEM RESOURCE SIMULATOR &bull; RETRO SYSTEMS CONSOLE REV 3.2
       </footer>
     </div>
   );

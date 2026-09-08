@@ -77,24 +77,24 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   };
 
   return (
-    <div className="bg-[#12130F] border border-[#2A2A26] rounded-[4px] p-4 select-none">
+    <div className="retro-panel p-4 select-none">
       {/* Instrument Header / Channel Status */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-[#2A2A26] pb-2.5 text-xs font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-[#262922] pb-2.5 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#39FF6A] inline-block animate-pulse" />
-          <span className="font-medium text-[#E8F5E9] tracking-wider">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#39FF6A] inline-block animate-pulse shadow-[0_0_8px_#39FF6A]" />
+          <span className="font-bold text-[#E8F5E9] tracking-wider uppercase">
             OSCILLOSCOPE // CH1: CPU_EXEC_SIGNAL
           </span>
         </div>
-        <div className="flex items-center gap-4 text-[#888888] text-[11px]">
+        <div className="flex items-center gap-4 text-[#83887E] text-[11px]">
           <div>
-            TRACE: <span className="text-[#39FF6A]">#39FF6A (ACTIVE)</span>
+            TRACE: <span className="text-[#39FF6A] font-semibold">ACTIVE EXECUTION</span>
           </div>
           <div>
-            MARKER: <span className="text-[#FF6B35]">#FF6B35 (CS OVERHEAD)</span>
+            MARKER: <span className="text-[#FF6B35] font-semibold">CS OVERHEAD</span>
           </div>
           <div>
-            TOTAL: <span className="text-[#E8F5E9] font-bold">{totalTime}</span> TICKS
+            SPAN: <span className="text-[#E8F5E9] font-bold">{totalTime}</span> TICKS
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
       <div
         ref={containerRef}
         onPointerDown={handlePointerDown}
-        className="relative bg-[#080907] border border-[#2A2A26] rounded-[2px] p-1 cursor-crosshair overflow-hidden"
+        className="relative bg-[#060705] border border-[#262922] rounded-[3px] p-1 cursor-crosshair overflow-hidden shadow-inner"
       >
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
@@ -113,12 +113,12 @@ export const GanttChart: React.FC<GanttChartProps> = ({
           <defs>
             {/* Grid Pattern */}
             <pattern id="reticleGrid" width="40" height="20" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="0" x2="40" y2="0" stroke="#1A1C16" strokeWidth="1" />
-              <line x1="0" y1="0" x2="0" y2="20" stroke="#1A1C16" strokeWidth="1" />
+              <line x1="0" y1="0" x2="40" y2="0" stroke="#181C14" strokeWidth="1" />
+              <line x1="0" y1="0" x2="0" y2="20" stroke="#181C14" strokeWidth="1" />
             </pattern>
             {/* Subtle phosphor trail glow under signal */}
             <linearGradient id="traceFade" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#39FF6A" stopOpacity="0.12" />
+              <stop offset="0%" stopColor="#39FF6A" stopOpacity="0.18" />
               <stop offset="100%" stopColor="#39FF6A" stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -132,7 +132,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             y1={activeY}
             x2={svgWidth - paddingX}
             y2={activeY}
-            stroke="#2A2A26"
+            stroke="#262922"
             strokeDasharray="4 4"
             strokeWidth="1"
           />
@@ -141,19 +141,19 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             y1={baselineY}
             x2={svgWidth - paddingX}
             y2={baselineY}
-            stroke="#2A2A26"
+            stroke="#262922"
             strokeWidth="1"
           />
 
           {/* Y-Axis Labels */}
-          <text x={paddingX - 4} y={activeY + 3} textAnchor="end" fill="#888888" fontSize="8" fontFamily="monospace">
+          <text x={paddingX - 4} y={activeY + 3} textAnchor="end" fill="#83887E" fontSize="8" fontFamily="monospace" fontWeight="bold">
             BUSY
           </text>
-          <text x={paddingX - 4} y={baselineY + 3} textAnchor="end" fill="#888888" fontSize="8" fontFamily="monospace">
+          <text x={paddingX - 4} y={baselineY + 3} textAnchor="end" fill="#83887E" fontSize="8" fontFamily="monospace">
             IDLE
           </text>
 
-          {/* Context-Switch Overhead Markers (Dashed Orange Lines crossing trace) */}
+          {/* Context-Switch Overhead Markers */}
           {csMarkers.map((cs, idx) => (
             <g key={`cs-${idx}`}>
               <line
@@ -165,7 +165,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                 strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
-              <rect x={cs.x - 12} y={10} width="24" height="12" fill="#12130F" stroke="#FF6B35" strokeWidth="1" />
+              <rect x={cs.x - 12} y={10} width="24" height="12" fill="#12130F" stroke="#FF6B35" strokeWidth="1" rx="1" />
               <text
                 x={cs.x}
                 y={19}
@@ -181,21 +181,20 @@ export const GanttChart: React.FC<GanttChartProps> = ({
           ))}
 
           {/* Stepped Phosphor Green Oscilloscope Trace */}
-          {/* Shaded phosphor under active waveform */}
           <path
             d={`${pathD} L ${paddingX + plotWidth} ${baselineY} L ${paddingX} ${baselineY} Z`}
             fill="url(#traceFade)"
           />
 
-          {/* Sharp phosphor step trace with subtle 1px glow */}
+          {/* Sharp phosphor step trace with dual glow filter */}
           <path
             d={pathD}
             fill="none"
             stroke="#39FF6A"
-            strokeWidth="2"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-            style={{ filter: 'drop-shadow(0 0 1px #39FF6A)' }}
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ filter: 'drop-shadow(0 0 3px #39FF6A) drop-shadow(0 0 10px rgba(57,255,106,0.5))' }}
           />
 
           {/* Process Labels on the Waveform Pulses */}
@@ -203,12 +202,13 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             <g key={`pl-${idx}`}>
               <text
                 x={pl.x}
-                y={26}
+                y={24}
                 textAnchor="middle"
                 fill="#39FF6A"
-                fontSize="9"
+                fontSize="9.5"
                 fontFamily="monospace"
                 fontWeight="bold"
+                style={{ filter: 'drop-shadow(0 0 2px #39FF6A)' }}
               >
                 {pl.pid}
               </text>
@@ -222,15 +222,16 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             x2={cursorX}
             y2={svgHeight - 10}
             stroke="#39FF6A"
-            strokeWidth="1.5"
+            strokeWidth="2"
+            style={{ filter: 'drop-shadow(0 0 6px #39FF6A)' }}
           />
           {/* Reticle pip at trace height */}
-          <circle cx={cursorX} cy={lastY} r="3" fill="#0A0A0A" stroke="#39FF6A" strokeWidth="1.5" />
+          <circle cx={cursorX} cy={lastY} r="3.5" fill="#39FF6A" stroke="#080907" strokeWidth="1.5" />
 
           {/* Top cursor readout badge */}
           <g transform={`translate(${Math.max(paddingX, Math.min(cursorX - 25, svgWidth - paddingX - 50))}, 2)`}>
-            <rect width="50" height="12" fill="#12130F" stroke="#39FF6A" strokeWidth="1" />
-            <text x="25" y="9" textAnchor="middle" fill="#39FF6A" fontSize="8" fontFamily="monospace">
+            <rect width="50" height="13" fill="#11130E" stroke="#39FF6A" strokeWidth="1" rx="2" />
+            <text x="25" y="9.5" textAnchor="middle" fill="#39FF6A" fontSize="8.5" fontFamily="monospace" fontWeight="bold">
               T={currentTick}
             </text>
           </g>
