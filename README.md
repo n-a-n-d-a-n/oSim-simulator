@@ -84,11 +84,28 @@ instrument chassis.
   - Reversible timeline playback (Play / Pause / Step Forward / Step Back / Reset / Speed / Scrubber).
   - Chronological memory event stream with type filters.
 
+### 🔬 Live System Observation (Foundation)
+- **Non-Invasive Read-Only Instrumentation**: Host system telemetry collection strictly bounded to read-only operations via Python `psutil`.
+- **Pure Architectural Decoupling**: Complete AST-verified isolation between `backend/live_agent/` and `backend/sim_engine/` — `sim_engine` contains zero OS/live/psutil dependencies.
+- **Immutable Domain Telemetry**: Frozen dataclasses (`ProcessObservation`, `CPUObservation`, `MemoryObservation`, `SystemSnapshot`) with strict non-negative bounds and deterministic PID ordering.
+- **Robust Collector Abstraction**: Abstract collector contracts (`CPUCollector`, `MemoryCollector`, `ProcessCollector`) with ephemeral process skip semantics, honest CPU sampling intervals (no zero fabrication), and non-blocking failure surfacing.
+- **FastAPI Endpoints**:
+  - `GET /api/v1/live/status`: Subsystem health, availability, and host platform reporting.
+  - `GET /api/v1/live/snapshot`: Explicit user-triggered point-in-time system snapshot (no background polling or automatic loops).
+- **Retro Systems Console Live View**:
+  - Point-in-time system summary banner with read-only badge and host status indicator.
+  - Hardware telemetry gauges (CPU utilization, core count, RAM & Swap utilization breakdown).
+  - Searchable, sortable process table with process state tags, CPU/Memory percentages, thread counts, and memory footprint.
+  - On-demand "CAPTURE SNAPSHOT" trigger.
+- **Architecture Documentation**: Detailed specification in [`docs/live-system-architecture.md`](docs/live-system-architecture.md).
+
 ---
 
 ## Planned Phases
 
-- ⬜ **Phase 4 - Virtual Memory + Page Replacement** (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
+> **Note on Project Sequencing**: **Phase 4 (Virtual Memory + Page Replacement)** is **intentionally paused** while the **Live System Observation Foundation** is established and verified.
+
+- ⏸️ **Phase 4 - Virtual Memory + Page Replacement** (*Temporarily Paused*) (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
 - ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
 - ⬜ **Phase 6 - Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
 - ⬜ **Phase 7 - Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
