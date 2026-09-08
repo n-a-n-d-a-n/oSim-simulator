@@ -18,7 +18,7 @@ under textbook workloads and custom edge cases.
 
 ## UI Preview
 
-| CPU Scheduling - Oscilloscope View | Memory Allocation — Address Map | Live System Observation — Real-Time Monitor |
+| CPU Scheduling - Oscilloscope View | Memory Allocation - Address Map | Live System Observation — Real-Time Monitor |
 |---|---|---|
 | ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
 
