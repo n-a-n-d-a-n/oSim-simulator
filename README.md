@@ -101,13 +101,36 @@ against a near-black instrument chassis.
   - **Freshness & Stale Indicators**: Explicit timestamping with warning indicator on connection interruptions.
 - **Architecture Documentation**: Detailed specification in [`docs/live-system-architecture.md`](docs/live-system-architecture.md).
 
+### ✅ Phase 4 - Virtual Memory + Page Replacement
+- **Pure-Python Virtual Memory Engine**: Completely decoupled discrete-time paging simulation subsystem with strict invariant preservation.
+- **Mathematical Address Decomposition**: Power-of-two virtual address spaces decomposing byte addresses into virtual page number ($\lfloor \text{addr} / S \rfloor$) and offset ($\text{addr} \pmod S$).
+- **Single-Level Page Table**: Strict single-level page mapping tracking page residency with explicit `is_present: bool` semantics (distinguishing resident pages from valid addresses).
+- **Physical Memory Pool**: Indexed RAM hardware frame management with deterministic free-frame allocation before page replacement.
+- **Page Replacement Policies**:
+  - **FIFO**: First-In, First-Out replacement evicting the longest resident page (exhibits classic Belady's anomaly).
+  - **LRU**: Least Recently Used replacement evicting the least recently accessed page (stack algorithm, immune to Belady's anomaly).
+  - **Optimal (Belady's MIN)**: Theoretical offline benchmark inspecting remaining reference sequence to evict pages not used for the longest time or never used again.
+  - **Second-Chance (Clock)**: Hardware approximation of LRU with persistent circular clock hand and reference-bit clearing across scan revolutions.
+- **Dual Input Modes**:
+  - **Page References**: Stream of abstract page numbers with zero offset (e.g. `[7, 0, 1, 2, 0, 3...]`).
+  - **Byte Virtual Addresses**: Stream of decimal or hexadecimal byte addresses decomposed into page numbers and offsets (e.g. `[0x0, 0x1000, 0x1388...]`).
+- **Comprehensive Paging Metrics**: Page hits, page faults, hit ratio, fault ratio, replacements, evictions, and free frame counts.
+- **FastAPI Endpoints**:
+  - `POST /api/v1/virtual-memory/simulate`: Simulates paging and returns tick-by-tick immutable snapshots, events, and metrics.
+  - `GET /api/v1/virtual-memory/workloads`: Educational benchmark presets (Silberschatz, Belady's anomaly, Clock scan, Locality, Thrashing).
+  - `GET /api/v1/virtual-memory/workloads/{preset_id}`: Single preset retrieval.
+- **Systems Console UI**:
+  - MMU address translation pipeline visualizer (Virtual Address $\to$ Page/Offset $\to$ Physical Address).
+  - High-visibility `[PAGE HIT]` (phosphor green) vs `[PAGE FAULT]` (crimson) oscilloscope banner.
+  - Physical RAM hardware frame cards with occupancy, load/access timestamps, and animated `[CLOCK HAND ➜]` badge.
+  - Tabular Single-Level Page Table with presence indicators and reference bits.
+  - Reversible timeline playback (Play / Pause / Step Forward / Step Back / Reset / Speed / Scrubber).
+  - Detailed technical documentation in [`docs/phase-4-report.md`](docs/phase-4-report.md).
+
 ---
 
 ## Planned Phases
 
-> **Note on Project Sequencing**: **Phase 4 (Virtual Memory + Page Replacement)** is **intentionally paused** while the **Live System Observation Foundation** is established and verified.
-
-- ⏸️ **Phase 4 - Virtual Memory + Page Replacement** (*Temporarily Paused*) (Paging, Page Tables, TLB simulation, FIFO, LRU, Optimal page replacement)
 - ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
 - ⬜ **Phase 6 - Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
 - ⬜ **Phase 7 - Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
