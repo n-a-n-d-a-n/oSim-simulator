@@ -28,6 +28,16 @@ from backend.app.schemas.memory import (
     MemoryPresetItemResponse,
 )
 
+from backend.app.schemas.virtual_memory import (
+    VirtualMemoryAlgorithmType,
+    VirtualMemorySimulateRequest,
+    VirtualMemorySimulateResponse,
+    VirtualMemoryPresetItemResponse,
+    VirtualMemorySnapshotResponse,
+    VirtualMemoryMetricsResponse,
+    VirtualMemoryEventResponse,
+)
+
 __all__ = [
     "AlgorithmType",
     "ProcessInput",
@@ -52,4 +62,11 @@ __all__ = [
     "MemorySimulateRequest",
     "MemorySimulateResponse",
     "MemoryPresetItemResponse",
+    "VirtualMemoryAlgorithmType",
+    "VirtualMemorySimulateRequest",
+    "VirtualMemorySimulateResponse",
+    "VirtualMemoryPresetItemResponse",
+    "VirtualMemorySnapshotResponse",
+    "VirtualMemoryMetricsResponse",
+    "VirtualMemoryEventResponse",
 ]
