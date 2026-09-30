@@ -4,7 +4,7 @@
 
 **OSim** is an educational, web-based operating-system simulator designed to
 visualize core OS resource-management concepts interactively. Styled as a "retro
-systems console" — oscilloscope-style execution traces, terminal event logs, and
+systems console" - oscilloscope-style execution traces, terminal event logs, and
 punch-card process strips — it bridges the gap between theoretical operating system
 principles and practical runtime behavior through real-time Gantt charts,
 proportional address-accurate memory maps, MMU address-translation pipelines,
