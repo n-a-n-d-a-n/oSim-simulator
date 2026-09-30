@@ -7,14 +7,16 @@ visualize core OS resource-management concepts interactively. Styled as a "retro
 systems console" — oscilloscope-style execution traces, terminal event logs, and
 punch-card process strips — it bridges the gap between theoretical operating system
 principles and practical runtime behavior through real-time Gantt charts,
-proportional address-accurate memory maps, process state tracking, and deterministic
-timeline playback.
+proportional address-accurate memory maps, MMU address-translation pipelines,
+process state tracking, and deterministic timeline playback.
 
 The simulator allows students, educators, and systems engineers to inspect
-step-by-step CPU scheduling and contiguous memory allocation, observe real-world
-host operating system processes and hardware telemetry in real time, simulate context
-switches, examine ready queues and free holes, and analyze performance metrics
-under textbook workloads and custom edge cases.
+step-by-step CPU scheduling, contiguous memory allocation, and virtual memory
+paging with page replacement (deterministic simulated OS resource management),
+alongside non-invasive, read-only observation of real-world host operating system
+processes and hardware telemetry. Users can simulate context switches, examine ready
+queues, free holes, single-level page tables, and physical frame pools, and analyze
+performance metrics under textbook workloads and custom edge cases.
 
 ## UI Preview
 
@@ -147,6 +149,7 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 │       (Vite, TypeScript, Retro Systems Console Dashboard)              │
 │       • CPU Scheduling (Phase 1 & 2)                                   │
 │       • Contiguous Memory Allocation (Phase 3)                         │
+│       • Virtual Memory / Paging (Phase 4)                              │
 │       • Live System Observation (LIVE-1 Foundation & LIVE-2 Monitor)   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON
@@ -164,7 +167,8 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 │ • Standard library only             │ │ • Non-invasive read-only       │
 │ • Deterministic discrete ticks      │ │ • psutil host inspection       │
 │ • CPU schedulers & memory models    │ │ • Real CPU, RAM, & processes   │
-│ • ZERO OS/live/network dependencies │ │ • Zero command/kill privileges │
+│ • Virtual memory / page replacement │ │ • Zero command/kill privileges │
+│ • ZERO OS/live/network dependencies │ │                                │
 └─────────────────────────────────────┘ └────────────────────────────────┘
 ```
 
@@ -190,6 +194,14 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 | **Best Fit** | Address 0 (exhaustive) | Smallest block where $\text{size} \ge \text{requested}$ | Lowest start address |
 | **Worst Fit** | Address 0 (exhaustive) | Largest block where $\text{size} \ge \text{requested}$ | Lowest start address |
 | **Next Fit** | Current Address Cursor | First block from cursor with wrap-around | Scan order from cursor |
+
+### Virtual Memory & Page Replacement
+| Policy | Type | Eviction Criteria | Tie-Breaking / State |
+| :--- | :--- | :--- | :--- |
+| **FIFO** (First-In, First-Out) | Online | Longest resident page (`loaded_at_tick`) | Deterministic insertion order |
+| **LRU** (Least Recently Used) | Online | Least recently accessed page (`last_accessed_tick`) | Lowest frame index |
+| **Optimal** (Belady's MIN) | Offline Benchmark | Page never used again, or farthest next future reference | Lowest frame index |
+| **Clock** (Second-Chance) | Online | First page with `reference_bit == 0` along circular scan | Persistent `clock_hand` pointer |
 
 ---
 
@@ -223,6 +235,9 @@ uvicorn backend.app.main:app --reload --port 8000
 | `/api/v1/memory/simulate` | `POST` | Memory Simulation | Run discrete-time contiguous memory allocation simulation |
 | `/api/v1/memory/workloads` | `GET` | Memory Simulation | Retrieve catalog of educational contiguous memory presets |
 | `/api/v1/memory/workloads/{preset_id}` | `GET` | Memory Simulation | Retrieve a specific memory workload preset |
+| `/api/v1/virtual-memory/simulate` | `POST` | Virtual Memory | Run deterministic virtual-memory paging/page-replacement simulation |
+| `/api/v1/virtual-memory/workloads` | `GET` | Virtual Memory | Retrieve educational virtual-memory workload presets |
+| `/api/v1/virtual-memory/workloads/{preset_id}` | `GET` | Virtual Memory | Retrieve one virtual-memory preset |
 | `/api/v1/live/status` | `GET` | Live Observation | Check host observation collector availability and platform |
 | `/api/v1/live/snapshot` | `GET` | Live Observation | Capture point-in-time real host CPU, memory, and process telemetry |
 
@@ -236,20 +251,28 @@ npm run dev
 Open your browser at the displayed local URL (typically `http://localhost:5173`). Switch seamlessly between:
 - **CPU SCHEDULING (PHASE 1 & 2)**: Oscilloscope Gantt trace, state cards, ready queue, Silberschatz presets, timeline scrubber.
 - **CONTIGUOUS MEMORY ALLOCATION (PHASE 3)**: Address-accurate proportional memory map, dynamic free/allocated holes, Next Fit cursor, external fragmentation diagnostics.
+- **VIRTUAL MEMORY (PHASE 4)**: MMU/address translation visualization, single-level page table (`is_present` residency), physical frame pool with Clock hand indicator, page faults/hits, FIFO/LRU/Optimal/Clock policies, and reversible timeline playback.
 - **LIVE SYSTEM (FOUNDATION & REAL-TIME)**: Non-invasive host observation, real-time auto-refresh polling (1s / 2s / 5s / Paused), 60s discrete telemetry sparklines, per-core matrix, and sortable/searchable process table.
 
-### 4. Run Automated Tests
-Execute the full test suite (**94 tests**) from the repository root:
+### 4. Run Automated Tests & Validation
+Execute the full test suite from the repository root (current verified baseline: **125 passed**):
 ```bash
 pytest
 ```
-To run tests with verbose output:
+To run tests with concise or verbose output:
 ```bash
+python -m pytest -q
 pytest -v
 ```
 To verify that the simulation engine remains strictly decoupled from host/OS/web libraries (AST boundary test):
 ```bash
 pytest backend/tests/test_architecture_boundaries.py -v
+```
+To validate the frontend TypeScript build and linter (current verified baseline: **0 errors**):
+```bash
+cd frontend
+npm run build
+npm run lint
 ```
 
 ### 5. Run the CLI Demonstration
