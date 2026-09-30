@@ -20,16 +20,18 @@ performance metrics under textbook workloads and custom edge cases.
 
 ## UI Preview
 
-| CPU Scheduling - Oscilloscope View | Memory Allocation - Address Map | Live System Observation - Real-Time Monitor |
-|---|---|---|
-| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
+| CPU Scheduling - Oscilloscope View | Memory Allocation - Address Map | Virtual Memory - Paging & Replacement | Live System Observation - Real-Time Monitor |
+|---|---|---|---|
+| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Virtual Memory view](docs/screenshots/virtual-memory.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
 
 The interface renders simulation state as a live instrument panel: a stepped
-oscilloscope trace for CPU execution, `[BRACKETED]` terminal-style state tags for
-process transitions, a scrolling TTY event stream, real-time discrete 60s telemetry sparklines,
-a multi-core execution matrix, and punch-card style process input strips — all built on a strict
-six-color token system (phosphor green, amber, rust, warning orange, punch-hole crimson, muted gray)
-against a near-black instrument chassis.
+oscilloscope trace for CPU execution, proportional contiguous memory maps, hardware
+MMU address-translation pipelines and physical frame pools, `[BRACKETED]` terminal-style
+state tags for process and page transitions, a scrolling TTY event stream, real-time
+discrete 60s telemetry sparklines, a multi-core execution matrix, and punch-card style
+process input strips — all built on a strict six-color token system (phosphor green,
+amber, rust, warning orange, punch-hole crimson, muted gray) against a near-black
+instrument chassis.
 
 ---
 
