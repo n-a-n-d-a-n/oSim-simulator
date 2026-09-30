@@ -29,7 +29,7 @@ oscilloscope trace for CPU execution, proportional contiguous memory maps, hardw
 MMU address-translation pipelines and physical frame pools, `[BRACKETED]` terminal-style
 state tags for process and page transitions, a scrolling TTY event stream, real-time
 discrete 60s telemetry sparklines, a multi-core execution matrix, and punch-card style
-process input strips — all built on a strict six-color token system (phosphor green,
+process input strips - all built on a strict six-color token system (phosphor green,
 amber, rust, warning orange, punch-hole crimson, muted gray) against a near-black
 instrument chassis.
 
