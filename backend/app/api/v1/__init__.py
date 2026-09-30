@@ -6,6 +6,7 @@ from backend.app.api.v1.workloads import router as workloads_router
 from backend.app.api.v1.memory import router as memory_router
 from backend.app.api.v1.live import router as live_router
 from backend.app.api.v1.virtual_memory import router as virtual_memory_router
+from backend.app.api.v1.deadlock import router as deadlock_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(cpu_router)
@@ -13,5 +14,7 @@ api_v1_router.include_router(workloads_router)
 api_v1_router.include_router(memory_router)
 api_v1_router.include_router(live_router)
 api_v1_router.include_router(virtual_memory_router)
+api_v1_router.include_router(deadlock_router)
 
 __all__ = ["api_v1_router"]
+

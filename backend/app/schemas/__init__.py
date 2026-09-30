@@ -38,6 +38,25 @@ from backend.app.schemas.virtual_memory import (
     VirtualMemoryEventResponse,
 )
 
+from backend.app.schemas.deadlock import (
+    RequestOutcomeEnum,
+    GraphNodeResponse,
+    GraphEdgeResponse,
+    GraphSnapshotResponse,
+    SafetyStepResponse,
+    DetectionStepResponse,
+    RequestEvaluationResponse,
+    DeadlockSystemStateResponse,
+    DeadlockTimelineSnapshotResponse,
+    DeadlockEventResponse,
+    DeadlockMetricsResponse,
+    DeadlockSafetyRequest,
+    DeadlockResourceRequestInput,
+    DeadlockDetectRequest,
+    DeadlockSimulationResponse,
+    DeadlockPresetItemResponse,
+)
+
 __all__ = [
     "AlgorithmType",
     "ProcessInput",
@@ -69,4 +88,21 @@ __all__ = [
     "VirtualMemorySnapshotResponse",
     "VirtualMemoryMetricsResponse",
     "VirtualMemoryEventResponse",
+    "RequestOutcomeEnum",
+    "GraphNodeResponse",
+    "GraphEdgeResponse",
+    "GraphSnapshotResponse",
+    "SafetyStepResponse",
+    "DetectionStepResponse",
+    "RequestEvaluationResponse",
+    "DeadlockSystemStateResponse",
+    "DeadlockTimelineSnapshotResponse",
+    "DeadlockEventResponse",
+    "DeadlockMetricsResponse",
+    "DeadlockSafetyRequest",
+    "DeadlockResourceRequestInput",
+    "DeadlockDetectRequest",
+    "DeadlockSimulationResponse",
+    "DeadlockPresetItemResponse",
 ]
+

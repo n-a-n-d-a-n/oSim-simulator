@@ -22,22 +22,26 @@ import { TimelineControls } from './components/cpu/TimelineControls';
 
 import { MemoryDashboard } from './components/memory/MemoryDashboard';
 import { VirtualMemoryDashboard } from './components/virtualMemory/VirtualMemoryDashboard';
+import { DeadlockDashboard } from './components/deadlock/DeadlockDashboard';
 import { LiveDashboard } from './components/live/LiveDashboard';
-import { AlertCircle, Cpu, Layers, Activity, Binary } from 'lucide-react';
+import { AlertCircle, Cpu, Layers, Activity, Binary, ShieldAlert } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation Module Tab
-  const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'virtual_memory' | 'live'>(() => {
+  const [activeTab, setActiveTab] = useState<'cpu' | 'memory' | 'virtual_memory' | 'deadlock' | 'live'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'deadlock' || params.get('tab') === 'banker') return 'deadlock';
       if (params.get('tab') === 'live') return 'live';
       if (params.get('tab') === 'virtual_memory' || params.get('tab') === 'vm') return 'virtual_memory';
       if (params.get('tab') === 'memory' || params.has('memory_tick')) return 'memory';
+      if (window.location.hash.includes('deadlock') || window.location.hash.includes('banker')) return 'deadlock';
       if (window.location.hash.includes('vm') || window.location.hash.includes('virtual')) return 'virtual_memory';
       if (window.location.hash.includes('memory')) return 'memory';
     }
     return 'cpu';
   });
+
 
   // CPU Simulator configuration state
   const [algorithm, setAlgorithm] = useState<AlgorithmType>('SRTF');
@@ -172,6 +176,18 @@ export const App: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('deadlock')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[3px] text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'deadlock'
+                ? 'bg-[#181C14] text-[#39FF6A] border border-[#39FF6A]/70 shadow-[0_0_12px_rgba(57,255,106,0.18)]'
+                : 'text-[#83887E] hover:text-[#E8F5E9] border border-transparent hover:bg-[#151712]'
+            }`}
+          >
+            <ShieldAlert className={`w-3.5 h-3.5 ${activeTab === 'deadlock' ? 'text-[#39FF6A]' : 'text-[#83887E]'}`} />
+            <span>DEADLOCK / BANKER'S (PHASE 5)</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('live')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[3px] text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'live'
@@ -182,6 +198,7 @@ export const App: React.FC = () => {
             <Activity className={`w-3.5 h-3.5 ${activeTab === 'live' ? 'text-[#4EC9B0]' : 'text-[#83887E]'}`} />
             <span>LIVE SYSTEM (FOUNDATION)</span>
           </button>
+
         </div>
 
         {/* ACTIVE TAB: CPU SIMULATOR */}
@@ -304,12 +321,20 @@ export const App: React.FC = () => {
           </div>
         )}
 
+        {/* ACTIVE TAB: DEADLOCK & BANKER'S ALGORITHM (PHASE 5) */}
+        {activeTab === 'deadlock' && (
+          <div className="space-y-6">
+            <DeadlockDashboard />
+          </div>
+        )}
+
         {/* ACTIVE TAB: LIVE SYSTEM OBSERVATION (FOUNDATION) */}
         {activeTab === 'live' && (
           <div className="space-y-6">
             <LiveDashboard />
           </div>
         )}
+
       </div>
 
       {/* Footer */}
