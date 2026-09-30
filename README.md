@@ -131,11 +131,45 @@ instrument chassis.
   - Reversible timeline playback (Play / Pause / Step Forward / Step Back / Reset / Speed / Scrubber).
   - Detailed technical documentation in [`docs/phase-4-report.md`](docs/phase-4-report.md).
 
+### ✅ Phase 5 - Deadlock Detection + Banker's Algorithm
+- **Pure-Python Deadlock Subsystem**: Decoupled domain engine modeling processes ($n$), resource types ($m$), multiple instances, and matrix invariants ($Alloc$, $Max$, $Need$, $Request$, $Total$, $Available$).
+- **Strict Invariant Verification**: Mathematical enforcement of conservation of instances ($\sum Alloc_j + A_j = E_j$), claim upper bounds ($Alloc \le Max$), non-negativity, and auto-computed $Need = Max - Alloc$.
+- **Banker's Safety Algorithm**: Deterministic $O(m \times n^2)$ safety algorithm finding safe execution sequences with lowest process index tie-breaking.
+- **Resource Request Evaluator**: Dynamic evaluation of process resource requests supporting:
+  - `GRANTED`: $Request \le Need$, $Request \le Available$, tentative state is SAFE.
+  - `WAITING`: $Request \le Need$, but $Request > Available$ (insufficient resources; no state change).
+  - `DENIED`: $Request \le Available$, but tentative state is UNSAFE (triggers complete structural rollback).
+  - `ERROR`: Claim exceeded ($Request > Need$) or invalid process/dimension.
+- **Deadlock Detection Engine**: Reactive Coffman/Silberschatz multi-instance row reduction using the actual $Request$ matrix (strictly distinct from $Need$).
+- **Graph Visualizations**:
+  - **Resource Allocation Graph (RAG)**: Bipartite directed graph showing processes, resource capacities, assignment edges ($R \to P$), and request edges ($P \to R$).
+  - **Wait-For Graph (WFG)**: Reduced directed graph for single-instance resource systems ($P_i \to P_k$).
+  - **Single vs Multi-Instance Cycle Semantics**: Communicates that single-instance cycle implies deadlock, whereas multi-instance cycle alone does not prove deadlock.
+- **Verified Educational Presets**:
+  1. *Classic Banker Safe State* (Silberschatz Ch. 7, safe sequence $\langle P_1, P_3, P_0, P_2, P_4 \rangle$).
+  2. *Granted Resource Request* ($P_1$ requests $[1, 0, 2] \implies$ GRANTED).
+  3. *Unsafe Request Denial* ($P_0$ requests $[0, 2, 0] \implies$ DENIED and rolled back).
+  4. *Single-Instance Circular Deadlock* (4-process ring $\implies$ DEADLOCKED).
+  5. *Multi-Instance Cycle with NO Deadlock* (Counterexample proving RAG cycle alone does not imply deadlock).
+  6. *Genuine Multi-Instance Deadlock* (Silberschatz 7.6.2 benchmark $\implies$ deadlocked set $\{P_1, P_2, P_3, P_4\}$).
+- **FastAPI Endpoints**:
+  - `POST /api/v1/deadlock/safety`: Banker's safety check and safe sequence generation.
+  - `POST /api/v1/deadlock/request`: Resource request evaluation with tentative allocation and rollback.
+  - `POST /api/v1/deadlock/detect`: Multi-instance matrix reduction detection.
+  - `GET /api/v1/deadlock/workloads`: Educational preset catalog.
+  - `GET /api/v1/deadlock/workloads/{preset_id}`: Preset scenario retrieval.
+- **Systems Console UI**:
+  - Matrix view ($Alloc$, $Max$, $Need$, $Request$, $Total$, $Available$).
+  - Work progression tracker, Finish array flags, and safe sequence badge.
+  - Interactive resource request form with instant outcome feedback.
+  - Interactive SVG RAG & WFG renderer with cycle highlighting.
+  - Reversible timeline playback and deterministic event log stream.
+  - Detailed technical report in [`docs/phase-5-report.md`](docs/phase-5-report.md).
+
 ---
 
 ## Planned Phases
 
-- ⬜ **Phase 5 - Deadlock Detection + Banker’s Algorithm** (Resource allocation graphs, cycle detection, safety algorithm, avoidance)
 - ⬜ **Phase 6 - Integrated OS Simulation** (Coupled CPU, Memory, and I/O subsystem workflows)
 - ⬜ **Phase 7 - Comparison / Benchmarking / Learning Mode** (Side-by-side algorithm benchmarking and interactive student quizzes)
 
@@ -152,6 +186,7 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 │       • CPU Scheduling (Phase 1 & 2)                                   │
 │       • Contiguous Memory Allocation (Phase 3)                         │
 │       • Virtual Memory / Paging (Phase 4)                              │
+│       • Deadlock Detection & Banker's Algorithm (Phase 5)              │
 │       • Live System Observation (LIVE-1 Foundation & LIVE-2 Monitor)   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON
@@ -170,6 +205,7 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 │ • Deterministic discrete ticks      │ │ • psutil host inspection       │
 │ • CPU schedulers & memory models    │ │ • Real CPU, RAM, & processes   │
 │ • Virtual memory / page replacement │ │ • Zero command/kill privileges │
+│ • Deadlock detection & Banker's     │ │                                │
 │ • ZERO OS/live/network dependencies │ │                                │
 └─────────────────────────────────────┘ └────────────────────────────────┘
 ```
@@ -204,6 +240,14 @@ OSim enforces a decoupled architecture with strict separation of concerns betwee
 | **LRU** (Least Recently Used) | Online | Least recently accessed page (`last_accessed_tick`) | Lowest frame index |
 | **Optimal** (Belady's MIN) | Offline Benchmark | Page never used again, or farthest next future reference | Lowest frame index |
 | **Clock** (Second-Chance) | Online | First page with `reference_bit == 0` along circular scan | Persistent `clock_hand` pointer |
+
+### Deadlock Avoidance & Detection
+| Algorithm | Classification | Demand Input | Output / Guarantees |
+| :--- | :--- | :--- | :--- |
+| **Banker's Safety Algorithm** | Avoidance | $Need = Max - Alloc$ | Safe sequence $\langle P_i, \dots \rangle$ or UNSAFE |
+| **Resource Request Evaluator** | Avoidance | Process $Request$ Vector | Tentative safety test $\implies$ GRANTED, WAITING, or DENIED (rollback) |
+| **Multi-Instance Matrix Reduction** | Detection | $Request$ Matrix | Reduced set or DEADLOCK DETECTED with deadlocked processes |
+| **WFG Cycle Detection** | Detection | Single-Instance Wait-For Graph | 3-Color DFS cycle detection ($\text{Cycle} \iff \text{Deadlock}$) |
 
 ---
 
@@ -240,6 +284,11 @@ uvicorn backend.app.main:app --reload --port 8000
 | `/api/v1/virtual-memory/simulate` | `POST` | Virtual Memory | Run deterministic virtual-memory paging/page-replacement simulation |
 | `/api/v1/virtual-memory/workloads` | `GET` | Virtual Memory | Retrieve educational virtual-memory workload presets |
 | `/api/v1/virtual-memory/workloads/{preset_id}` | `GET` | Virtual Memory | Retrieve one virtual-memory preset |
+| `/api/v1/deadlock/safety` | `POST` | Deadlock / Banker | Evaluate Banker's safety algorithm and find safe sequence |
+| `/api/v1/deadlock/request` | `POST` | Deadlock / Banker | Evaluate specific process resource request under avoidance |
+| `/api/v1/deadlock/detect` | `POST` | Deadlock / Banker | Run Coffman multi-instance matrix reduction detection |
+| `/api/v1/deadlock/workloads` | `GET` | Deadlock / Banker | Retrieve educational deadlock & Banker presets catalog |
+| `/api/v1/deadlock/workloads/{preset_id}` | `GET` | Deadlock / Banker | Retrieve a specific deadlock preset |
 | `/api/v1/live/status` | `GET` | Live Observation | Check host observation collector availability and platform |
 | `/api/v1/live/snapshot` | `GET` | Live Observation | Capture point-in-time real host CPU, memory, and process telemetry |
 
@@ -254,10 +303,11 @@ Open your browser at the displayed local URL (typically `http://localhost:5173`)
 - **CPU SCHEDULING (PHASE 1 & 2)**: Oscilloscope Gantt trace, state cards, ready queue, Silberschatz presets, timeline scrubber.
 - **CONTIGUOUS MEMORY ALLOCATION (PHASE 3)**: Address-accurate proportional memory map, dynamic free/allocated holes, Next Fit cursor, external fragmentation diagnostics.
 - **VIRTUAL MEMORY (PHASE 4)**: MMU/address translation visualization, single-level page table (`is_present` residency), physical frame pool with Clock hand indicator, page faults/hits, FIFO/LRU/Optimal/Clock policies, and reversible timeline playback.
+- **DEADLOCK / BANKER'S (PHASE 5)**: Matrix view ($Alloc, Max, Need, Request$), Banker's safe sequence visualizer, interactive resource request evaluator (Granted / Waiting / Denied / Rollback), bipartite RAG & single-instance WFG visualizer with cycle highlights.
 - **LIVE SYSTEM (FOUNDATION & REAL-TIME)**: Non-invasive host observation, real-time auto-refresh polling (1s / 2s / 5s / Paused), 60s discrete telemetry sparklines, per-core matrix, and sortable/searchable process table.
 
 ### 4. Run Automated Tests & Validation
-Execute the full test suite from the repository root (current verified baseline: **125 passed**):
+Execute the full test suite from the repository root (current verified baseline: **160 passed**):
 ```bash
 pytest
 ```
@@ -283,3 +333,4 @@ To run the terminal-based Silberschatz benchmark suite directly through the core
 python run_demo.py
 ```
 This runs FCFS, SJF, SRTF, Round Robin, Priority, and context-switch overhead demonstrations with deterministic verification.
+
