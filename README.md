@@ -11,27 +11,30 @@ proportional address-accurate memory maps, MMU address-translation pipelines,
 process state tracking, and deterministic timeline playback.
 
 The simulator allows students, educators, and systems engineers to inspect
-step-by-step CPU scheduling, contiguous memory allocation, and virtual memory
-paging with page replacement (deterministic simulated OS resource management),
-alongside non-invasive, read-only observation of real-world host operating system
-processes and hardware telemetry. Users can simulate context switches, examine ready
-queues, free holes, single-level page tables, and physical frame pools, and analyze
-performance metrics under textbook workloads and custom edge cases.
+step-by-step CPU scheduling, contiguous memory allocation, virtual memory
+paging with page replacement, and multi-resource deadlock detection with Banker's
+avoidance (deterministic simulated OS resource management), alongside non-invasive,
+read-only observation of real-world host operating system processes and hardware
+telemetry. Users can simulate context switches, examine ready queues, free holes,
+single-level page tables, physical frame pools, multi-resource allocation matrices,
+and bipartite Resource Allocation Graphs, and analyze performance metrics under
+textbook workloads and custom edge cases.
 
 ## UI Preview
 
-| CPU Scheduling - Oscilloscope View | Memory Allocation - Address Map | Virtual Memory - Paging & Replacement | Live System Observation - Real-Time Monitor |
-|---|---|---|---|
-| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Virtual Memory view](docs/screenshots/virtual-memory.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
+| CPU Scheduling - Oscilloscope View | Memory Allocation - Address Map | Virtual Memory - Paging & Replacement | Deadlock & Banker's - Allocation Graph | Live System Observation - Real-Time Monitor |
+|---|---|---|---|---|
+| ![CPU Scheduling view](docs/screenshots/cpu-scheduling.png) | ![Memory Allocation view](docs/screenshots/memory-allocation.png) | ![Virtual Memory view](docs/screenshots/virtual-memory.png) | ![Deadlock and Banker's view](docs/screenshots/deadlock-banker.png) | ![Live System view](docs/screenshots/live-monitoring.png) |
 
 The interface renders simulation state as a live instrument panel: a stepped
 oscilloscope trace for CPU execution, proportional contiguous memory maps, hardware
-MMU address-translation pipelines and physical frame pools, `[BRACKETED]` terminal-style
-state tags for process and page transitions, a scrolling TTY event stream, real-time
-discrete 60s telemetry sparklines, a multi-core execution matrix, and punch-card style
-process input strips - all built on a strict six-color token system (phosphor green,
-amber, rust, warning orange, punch-hole crimson, muted gray) against a near-black
-instrument chassis.
+MMU address-translation pipelines and physical frame pools, multi-resource allocation
+matrices and bipartite Resource Allocation Graphs (RAG) with cycle detection,
+`[BRACKETED]` terminal-style state tags for process, page, and safe sequence
+transitions, a scrolling TTY event stream, real-time discrete 60s telemetry sparklines,
+a multi-core execution matrix, and punch-card style process input strips - all built
+on a strict six-color token system (phosphor green, amber, rust, warning orange,
+punch-hole crimson, muted gray) against a near-black instrument chassis.
 
 ---
 
